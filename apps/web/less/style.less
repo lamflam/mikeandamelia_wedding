@@ -1,0 +1,23 @@
+
+@background-color: #fff;
+@footer-height: 60px;
+
+html, body {
+  height: 100%;
+}
+
+#content {
+  min-height: calc(~"100% -" (@footer-height * 2 + 22) );
+  margin-bottom: @footer-height;
+}
+
+#footer {
+  font-size: smaller;
+  height: @footer-height;
+  padding-top: 5px;
+  margin-top: -@footer-height;
+  background-color: darken(@background-color, 10%);
+}
+
+@import "includes/ichoose";
+@import "includes/user";

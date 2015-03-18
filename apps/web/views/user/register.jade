@@ -1,0 +1,27 @@
+.login
+  .col-xs-6.col-xs-offset-3
+    .well
+      form.form-horizontal(action='#', method='post')
+        .form-group(class='{{#if error.email}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="email") Email
+          .col-xs-10
+            input#email.form-control(name='email', placeholder='littlebobbytables@example.com', value="{{email}}")
+        .form-group(class='{{#if error.username}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="username") Username
+          .col-xs-10
+            input#username.form-control(name='username', placeholder='exploitsofamom', value="{{username}}")
+        .form-group(class='{{#if error.password}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="password") Password
+          .col-xs-10
+            input#password.form-control(name='password', placeholder='password', type='password', value="{{password}}")
+        .form-group(class='{{#if error.password2}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="password2") Confirm Password
+          .col-xs-10
+            input#password2.form-control(name='password2', placeholder='confirm password', type='password', value="{{password2}}")
+        .form-group.text-center
+          .col-xs-3.register-btn
+            button.btn.btn-primary.register Register

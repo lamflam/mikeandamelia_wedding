@@ -1,0 +1,24 @@
+div#header(class='navbar navbar-default navbar-static-top')
+  .container
+    .navbar-header
+      button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+        span.sr-only Nav Toggle
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.navbar-brand(href='/') Rewritten Code
+    .navbar-collapse.collapse
+      ul.nav.navbar-nav.navbar-right
+        {{#if user}}
+        li.dropdown
+          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.username}}&nbsp;
+            b.caret
+          ul.dropdown-menu
+            li
+              a(href='/user/logout') Logout
+        {{else}}
+        li
+          a(href='/user/login') Login
+        li
+          a(href='/user/register') Register
+        {{/if}}

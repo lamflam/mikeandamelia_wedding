@@ -1,0 +1,5 @@
+node_modules/*
+logs/*
+npm-debug.log
+apps/web/public/css/style.css
+config.json
