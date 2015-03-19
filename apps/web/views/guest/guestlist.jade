@@ -1,0 +1,11 @@
+h2.text-center Guest List
+#guestlist.col-xs-6.col-xs-offset-3
+  {{#each guests}}
+  .guest(id="guest-{{this.cid}}")
+  {{/each}}
+.col-xs-3.col-xs-offset-3.text-center.left-button
+  button.btn.btn-default.text-center.add
+    i.fa.fa-plus.fa-lg
+.col-xs-3.text-center.right-button
+  button.btn.btn-primary.text-center.choose
+    i.fa.fa-thumbs-up.fa-lg

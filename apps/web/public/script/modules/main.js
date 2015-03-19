@@ -4,7 +4,7 @@ define([
   "backbone",
   "jquery",
   "handlebars",
-  "ichoose",
+  "guest",
   "user",
   "text!tmpl/main/body.html"
 
@@ -100,7 +100,7 @@ define([
     all: function() { 
       
       if (!Backbone.history.fragment) {
-        Backbone.history.navigate("/ichoose", true);
+        Backbone.history.navigate("/guests", true);
       }
       else Backbone.$("#content").html("404");
     }
