@@ -4,5 +4,7 @@ module.exports = [
 	{ method: "all",   path: "*",                        controller: "users",  handler: "isAuthenticated"  },
 	{ method: "get",   path: "/api/users/me",            controller: "users",  handler: "me"               },
   { method: "get",   path: "/api/users",               controller: "users",  handler: "list"             },
-  { method: "post",  path: "/api/users",               controller: "users",  handler: "create"           }
+  { method: "post",  path: "/api/users",               controller: "users",  handler: "create"           },
+  { method: "get",   path: "/api/guests",              controller: "guests", handler: "list"             },
+  { method: "post",  path: "/api/guests",              controller: "guests", handler: "create"           }
 ];

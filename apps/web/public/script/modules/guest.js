@@ -28,6 +28,8 @@ define([
   
   var Guest = Guests.prototype.Guest = Backbone.RelationalModel.extend({
   
+    urlRoot: '/api/guests',
+
     initialize: function() {
     
     },
@@ -41,7 +43,9 @@ define([
   });
 
   var GuestList = Guests.prototype.GuestList = Backbone.Collection.extend({
-  
+    
+    url: '/api/guests',
+
     model: Guest
   
   });
@@ -50,6 +54,8 @@ define([
 
     template: Handlebars.compile( guest_template ),
 
+    tagName: 'tr',
+
     events: {
     
       "click button.remove": "removeClick",
@@ -57,6 +63,7 @@ define([
     },
 
     render: function() {
+
       this.$el.html( this.template( this.model.toJSON() ) );
 
       return this;
@@ -92,21 +99,26 @@ define([
       var $this = this;
       $this.guestViews = {};
       $this.collection = new GuestList();
+      $this.collection.fetch();
 
       _.bindAll( $this, 'addGuest', 'removeGuestView', 'addGuestView' );
       $this.collection.bind( 'remove', $this.removeGuestView );
       $this.collection.bind( 'add', $this.addGuestView );
 
-      $this.collection.each( function( model ) {
+      // $this.collection.each( function( model ) {
 
-        var view = new GuestView( { model: model } );
-        $this.guestViews[ model.cid ] = view;
+      //   var view = new GuestView( { model: model } );
+      //   $this.guestViews[ model.cid ] = view;
 
-      });
+      // });
     },
 
     addGuest: function() {
-      this.collection.add(new Guest());
+      var name = this.$el.find('.name-input input').val();
+      var email = this.$el.find('.email-input input').val();
+      if (name && email) {
+        this.collection.create({name: name, email: email});
+      }
     },
 
     removeGuestView: function( model ) {
@@ -141,7 +153,7 @@ define([
           .attr({id: "guest-" + id})
           .addClass("guest")
           .hide();
-        this.$el.find('#guestlist').append(el);
+        this.$el.find('#guestlist tbody').append(el);
         el.slideDown();
       }
       
