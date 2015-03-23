@@ -7,8 +7,9 @@ define([
   "backbone",
   "hash",
   "util",
+  "text!tmpl/user/user.html",
+  "text!tmpl/user/userlist.html",
   "text!tmpl/user/login.html",
-  "text!tmpl/user/register.html",
   "backbone-relational" 
 
 ], function(
@@ -19,8 +20,9 @@ define([
   Backbone,
   Hash,
   util,
-  login_template,
-  register_template
+  user_template,
+  userlist_template,
+  login_template
 
 ) {
 
@@ -53,7 +55,6 @@ define([
 
     login: function(user) {
       this.set(user);
-      util.cookie.set("tkn", user.token, { path: "/" });
     },
 
     logout: function() {
@@ -62,11 +63,13 @@ define([
     }
 
   });
-  Users.me = new Me();
+  me = Users.me = new Me();
 
   var User = Users.prototype.User = Backbone.RelationalModel.extend({
 
     urlRoot: '/api/users',
+
+    idAttribute: "_id",
 
     blacklist: ['password', 'password2', 'error'],
 
@@ -83,7 +86,7 @@ define([
 
       var error;
       var email = attributes.email;
-      var username = attributes.username;
+      var name = attributes.name;
       var password = attributes.password || "";
       var password2 = attributes.password2 || "";
       var rEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;        //'  // This fublime's syntax coloring 
@@ -93,9 +96,9 @@ define([
         error.email = "Invalid email address";
       }
 
-      if (!username) {
+      if (!name) {
         error = error || {};
-        error.username = "Must provide a username";
+        error.name = "Must enter your name";
       }
 
       if (password.length < 6) {
@@ -139,6 +142,76 @@ define([
 
   });
   
+  var UserList = Users.prototype.UserList = Backbone.Collection.extend({
+    
+    url: '/api/users',
+
+    model: User
+  
+  });
+
+  var UserView = Users.prototype.UserView = Backbone.View.extend({
+
+    template: Handlebars.compile( user_template ),
+
+    events: {
+
+      "click #save-button": "save",
+      "change input": "update"
+    },
+
+    initialize: function() {
+
+      _.bindAll(this, "render", "update");
+      this.model.on("change", this.render);
+      this.model.on("invalid", this.render);
+      this.model.fetch();
+    },
+
+    render: function() {
+      var data = {
+        responded: this.model.get("rsvp") != undefined,
+        user: this.model.toJSON(),
+        title: "Edit RSVP",
+        button_text: "Save"
+      };
+      this.$el.html(this.template(data));
+      return this;
+    },
+
+    update: function(e) {
+      var field = $(e.currentTarget).attr("name");
+      var value = $(e.currentTarget).val();
+      var obj = {};
+
+      obj[field] = value;
+      this.model.set(obj);
+    },
+
+    save: function(e) {
+      e.preventDefault();
+    }
+  });
+
+  var UserListView = Users.prototype.UserListView = Backbone.View.extend({
+
+    template: Handlebars.compile( userlist_template ),
+
+    initialize: function() {
+
+      this.collection = new UserList();
+      this.collection.fetch({reset: true});
+      _.bindAll(this, "render");
+      this.collection.bind("reset", this.render);
+    },
+
+    render: function() {
+      this.$el.html( this.template( { guests: this.collection.toJSON() } ) );
+      return this;
+    },
+
+  });
+
   var LoginView = Users.prototype.LoginView = Backbone.View.extend({
 
     template: Handlebars.compile( login_template ),
@@ -172,7 +245,7 @@ define([
     login: function(e) {
       e.preventDefault();
       this.model.login(function(model, user) {
-        Users.me.login(user);
+        Users.me.fetch();
         Backbone.history.navigate("/", true);
       });
     }
@@ -180,11 +253,11 @@ define([
 
   var RegisterView = Users.prototype.RegisterView = Backbone.View.extend({
 
-    template: Handlebars.compile( register_template ),
+    template: Handlebars.compile( user_template ),
 
     events: {
 
-      "click button.register": "register",
+      "click #save-button": "register",
       "change input": "update"
     },
 
@@ -195,7 +268,14 @@ define([
     },
 
     render: function() {
-      this.$el.html(this.template(this.model.toJSON()));
+      var data = {
+        responded: this.model.get("rsvp") != undefined,
+        user: this.model.toJSON(),
+        title: "New Guest",
+        button_text: "Register",
+        new: true
+      };
+      this.$el.html(this.template(data));
       return this;
     },
 
@@ -225,10 +305,24 @@ define([
     },
 
     routes: {
-      "user": function() { this.navigate("/user/login", true); },
-      "user/login": "login",
-      "user/register": "register",
-      "user/logout": "logout"
+      "users": "index",
+      "guests": "index",
+      "users/login": "login",
+      "guests/login": "login",
+      "users/register": "register",
+      "guests/register": "register",
+      "users/logout": "logout",
+      "guests/logout": "logout",
+      "users/me": "editme",
+      "guests/me": "editme",
+      "users/:id": "edit",
+      "guests/:id": "edit"
+    },
+
+    index: function() {
+
+      var view = new UserListView();
+      view.setElement($(this.selector)).render();
     },
 
     login: function() {
@@ -244,8 +338,21 @@ define([
     },
 
     logout: function() {
+
       Users.me.logout();
-      Backbone.history.navigate("/user/login", true);
+      Backbone.history.navigate("/guests/login", true);
+    },
+
+    editme: function() {
+
+      var view = new UserView({model: Users.me});
+      view.setElement($(this.selector)).render();
+    },
+
+    edit: function(id) {
+
+      var view = new UserView({model: new User({_id: id})});
+      view.setElement($(this.selector)).render();
     }
   });
 

@@ -4,7 +4,6 @@ define([
   "backbone",
   "jquery",
   "handlebars",
-  "guest",
   "user",
   "text!tmpl/main/body.html"
 
@@ -13,7 +12,6 @@ define([
   Backbone,
   $,
   Handlebars,
-  iChoose,
   Users,
   body_template
 
@@ -24,7 +22,7 @@ define([
     var $el = $(e.target);
     var href = $el.attr("href");
 
-    if (href.charAt(0) == "/") {
+    if (href && href.charAt(0) == "/") {
       e.preventDefault();
       Backbone.history.navigate(href, true);
     }
@@ -45,14 +43,13 @@ define([
     var router = new this.Router( selector );
 
     // Load submodules
-    var ichoose = new iChoose( "#content" );
     var users = new Users( "#content" );
 
     Users.me.on("change", function(me) {
 
-      var user = me.get('email') ?
-        me.attributes :
-        {};
+      var user;
+      if (me.get('email'))
+        user = me.attributes;
 
       view.render("#header", { user: user }  );
     });

@@ -1,0 +1,45 @@
+h2.text-center {{title}}
+.user-form
+  .col-xs-6.col-xs-offset-3
+    .well
+      form.form-horizontal(action='#', method='post')
+        .form-group(class='{{#if error.name}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="name") Name
+          .col-xs-10
+            input#name.form-control(name='name', placeholder='Full Name', value="{{user.name}}")
+        .form-group(class='{{#if error.email}}has-error{{/if}}')
+          .col-xs-2
+            label.control-label(for="email") Email
+          .col-xs-10
+            {{#if new}}
+            input#email.form-control(name='email', placeholder='youremail@example.com', value="{{user.email}}")
+            {{else}}
+            input#email.form-control(name='email', disabled, value="{{user.email}}")
+            {{/if}}
+        .form-group
+          .col-xs-2
+            label.control-label(for="rsvp") RSVP
+          .col-xs-4
+            select.form-control#rsvp
+              <option {{#if user.rsvp}}selected{{/if}}> Going </option>
+              <option {{#unless user.rsvp}}selected{{/unless}}> Not going </option>
+              <option {{#unless responded}}selected{{/unless}} disabled> Select One </option>
+        .form-group
+          .col-xs-2
+            label.control-label(for="comment") Comment
+          .col-xs-10
+            textarea#comment.form-control(name='comment', placeholder='Comment', , value="{{user.comment}}")
+        .form-group(class='{{#if error.password}}has-error{{/if}} {{#unless new}}hidden{{/unless}}')
+          .col-xs-2
+            label.control-label(for="password") Password
+          .col-xs-10
+            input#password.form-control(name='password', placeholder='Password', type='password', value="{{user.password}}")
+        .form-group(class='{{#if error.password2}}has-error{{/if}} {{#unless new}}hidden{{/unless}}')
+          .col-xs-2
+            label.control-label(for="password2") Confirm
+          .col-xs-10
+            input#password2.form-control(name='password2', placeholder='Confirm Password', type='password', value="{{user.password2}}")
+        .form-group.text-center
+          .col-xs-3.center-btn#save-button
+            button.btn.btn-primary {{button_text}}

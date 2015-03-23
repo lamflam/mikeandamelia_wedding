@@ -4,14 +4,16 @@ var MongoModel = require( '../../../lib/model' ).MongoModel;
 var jwt = require('jwt-simple');
 var _ = require('underscore');
 
-var privateFields = [
-	"hash",
-	"salt",
-	"iter"
-];
+var privateFields = {
+	hash: 0,
+  salt: 0,
+	iter: 0,
+	token: 0
+};
 
-var removePrivateFields = function(user) {
-	return user ? _.omit(user, privateFields) : null;
+var removePrivateFields = function(user, keep) {
+	var remove = _.omit(privateFields, keep || []);
+	return user ? _.omit(user, _.keys(remove)) : null;
 };
 
 var generateHash = function( user, callback ) {
@@ -33,7 +35,7 @@ var generateToken = function(user, callback) {
 
 	var token = jwt.encode({
 		email: user.email,
-		username: user.username
+		name: user.name
 	}, "secret");
 
 	user.token = token;
@@ -48,6 +50,14 @@ module.exports = MongoModel.extend({
   	this.name("users");
   },
 
+  list: function(query, callback) {
+  	return this.find(query, privateFields, callback);
+  },
+
+  get: function(query, callback) {
+  	return this.findOne(query, privateFields, callback);
+  },
+
   create: function( user, callback ) {
 
   	var $this = this;
@@ -56,7 +66,7 @@ module.exports = MongoModel.extend({
 				generateToken(user);
 				$this.insert(user, function(err, users) {
 					if (err) callback(err)
-					else callback(null, removePrivateFields(users[0]));
+					else callback(null, users[0].token, removePrivateFields(users[0]));
 				});
 			} else {
 				callback("Invalid data");
@@ -68,7 +78,7 @@ module.exports = MongoModel.extend({
 
   	var rEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;        //'  // This fublime's syntax coloring 
   	if (!rEmail.test(user.email)) return false;
-  	if (!user.username) return false;
+  	if (!user.name) return false;
   	if (!user.hash || user.hash.length < 64) return false;
   	if (!user.salt || user.salt.length < 64) return false;
 
@@ -87,7 +97,7 @@ module.exports = MongoModel.extend({
 			crypto.pbkdf2(hashbuf, saltbuf, user.iter, 64, function(err, hash) {
 				hash = hash.toString("base64");
 				(hash == user.hash) ?
-					callback(null, removePrivateFields(user)) :
+					callback(null, removePrivateFields(user, ["token"])) :
 					callback(null, false);
 			})
 		})
@@ -95,7 +105,6 @@ module.exports = MongoModel.extend({
 
 	verifyToken: function(token, callback) {
 		var user = jwt.decode(token, "secret");
-		console.log("decoded token", user);
 		(!user || !user.email) ? 
 			callback(null, false) :
 			callback(null, removePrivateFields(user));

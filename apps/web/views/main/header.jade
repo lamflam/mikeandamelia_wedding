@@ -11,14 +11,16 @@ div#header(class='navbar navbar-default navbar-static-top')
       ul.nav.navbar-nav.navbar-right
         {{#if user}}
         li.dropdown
-          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.username}}&nbsp;
+          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
             b.caret
           ul.dropdown-menu
             li
-              a(href='/user/logout') Logout
+              a(href='/guests/me') Edit RSVP
+            li
+              a(href='/guests/logout') Logout
         {{else}}
         li
-          a(href='/user/login') Login
+          a(href='/guests/login') Login
         li
-          a(href='/user/register') Register
+          a(href='/guests/register') Register
         {{/if}}
