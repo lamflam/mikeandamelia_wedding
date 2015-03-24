@@ -1,8 +1,9 @@
 h2.text-center {{title}}
+hr.col-xs-offset-3.col-xs-6
 .user-form
   .col-xs-6.col-xs-offset-3
     .well
-      form.form-horizontal(action='#', method='post')
+      form.form-horizontal(action='#')
         .form-group(class='{{#if error.name}}has-error{{/if}}')
           .col-xs-2
             label.control-label(for="name") Name
@@ -21,15 +22,20 @@ h2.text-center {{title}}
           .col-xs-2
             label.control-label(for="rsvp") RSVP
           .col-xs-4
-            select.form-control#rsvp
-              <option {{#if user.rsvp}}selected{{/if}}> Going </option>
-              <option {{#unless user.rsvp}}selected{{/unless}}> Not going </option>
+            select.form-control#rsvp(name='rsvp')
+              <option {{#if going}}selected{{/if}} value='yes'> Going </option>
+              <option {{#unless going}}selected{{/unless}} value='no'> Not going </option>
               <option {{#unless responded}}selected{{/unless}} disabled> Select One </option>
+        .form-group
+          .col-xs-2
+            label.control-label(for="guests") Guests
+          .col-xs-3
+            input#guest.form-control(name='guests', type='number', value='{{user.guests}}') 
         .form-group
           .col-xs-2
             label.control-label(for="comment") Comment
           .col-xs-10
-            textarea#comment.form-control(name='comment', placeholder='Comment', , value="{{user.comment}}")
+            textarea#comment.form-control(name='comment', placeholder='Comment') {{user.comment}}
         .form-group(class='{{#if error.password}}has-error{{/if}} {{#unless new}}hidden{{/unless}}')
           .col-xs-2
             label.control-label(for="password") Password

@@ -6,11 +6,13 @@ hr.col-xs-offset-3.col-xs-6
       tr
         th.name-column Name
         th.email-column Email
+        th.guests-column Guests
         th.rsvp-column RSVP
     tbody
       {{#each guests}}
-      .guest(id="guest-{{this._id}}")
+      tr.guest(id="{{this._id}}")
         td {{this.name}}
         td {{this.email}}
+        td {{this.guests}}
         td {{this.rsvp}}
       {{/each}}

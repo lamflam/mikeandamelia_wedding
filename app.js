@@ -5,7 +5,7 @@ var cluster = require('cluster');
 var App = require('./lib/app');
 
 
-var Rwc = module.exports = App.extend({
+var App = module.exports = App.extend({
 	setup: function() {
 
 	  var keys = this.config.apps || {};
@@ -22,5 +22,5 @@ var Rwc = module.exports = App.extend({
 });
 
 if (require.main === module) {
-  Rwc.create(path.join(__dirname,'config.json'));
+  App.create(path.join(__dirname,'config.json'));
 }

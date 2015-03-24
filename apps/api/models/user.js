@@ -7,8 +7,7 @@ var _ = require('underscore');
 var privateFields = {
 	hash: 0,
   salt: 0,
-	iter: 0,
-	token: 0
+	iter: 0
 };
 
 var removePrivateFields = function(user, keep) {
@@ -30,20 +29,6 @@ var generateHash = function( user, callback ) {
 	});
 };
 
-
-var generateToken = function(user, callback) {
-
-	var token = jwt.encode({
-		email: user.email,
-		name: user.name
-	}, "secret");
-
-	user.token = token;
-
-	if (callback) callback(null, token);
-	return token;
-}
-
 module.exports = MongoModel.extend({
 	
   init: function() {
@@ -55,18 +40,23 @@ module.exports = MongoModel.extend({
   },
 
   get: function(query, callback) {
+  	console.log()
   	return this.findOne(query, privateFields, callback);
   },
 
   create: function( user, callback ) {
 
   	var $this = this;
+  	
+  	if (!user.roles) {
+  		user.roles = ["user"];
+  	}
+
 		generateHash(user, function(err, user) {
-			if ($this.validate(user)) {
-				generateToken(user);
+			if ($this.validate(user, true)) {
 				$this.insert(user, function(err, users) {
 					if (err) callback(err)
-					else callback(null, users[0].token, removePrivateFields(users[0]));
+					else callback(null, removePrivateFields(users[0]));
 				});
 			} else {
 				callback("Invalid data");
@@ -74,13 +64,38 @@ module.exports = MongoModel.extend({
 		});
   },
 
-  validate: function( user ) {
+  updateOne: function(user, callback) {
 
+  	// email cannot be changed
+  	var user = _.clone(user);
+  	var email = user.email;
+  	delete user.email;
+  	delete user._id;
+  	delete user.roles;
+
+  	if (this.validate(user)) {
+  		this.findAndModify({email: email}, [['_id',1]], {$set: user}, {new: true}, function(err, user) {
+  			callback(err, removePrivateFields(user));
+  		});
+  	}
+  	else {
+  		callback("Invalid data");
+  	}
+  },
+
+  validate: function( user, isNew ) {
+
+  	// Only for a new user
   	var rEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;        //'  // This fublime's syntax coloring 
-  	if (!rEmail.test(user.email)) return false;
+  	if (isNew) {
+  		if (!rEmail.test(user.email)) return false;
+	  	if (!user.hash || user.hash.length < 64) return false;
+	  	if (!user.salt || user.salt.length < 64) return false;
+  	}
+
+  	// for all users
   	if (!user.name) return false;
-  	if (!user.hash || user.hash.length < 64) return false;
-  	if (!user.salt || user.salt.length < 64) return false;
+  	if (user.rsvp && user.rsvp !== 'yes' && user.rsvp !== 'no') return false;
 
   	return true;
   },
@@ -97,7 +112,7 @@ module.exports = MongoModel.extend({
 			crypto.pbkdf2(hashbuf, saltbuf, user.iter, 64, function(err, hash) {
 				hash = hash.toString("base64");
 				(hash == user.hash) ?
-					callback(null, removePrivateFields(user, ["token"])) :
+					callback(null, removePrivateFields(user)) :
 					callback(null, false);
 			})
 		})
@@ -105,9 +120,20 @@ module.exports = MongoModel.extend({
 
 	verifyToken: function(token, callback) {
 		var user = jwt.decode(token, "secret");
-		(!user || !user.email) ? 
+		(!user || !user.email || !user._id) ? 
 			callback(null, false) :
 			callback(null, removePrivateFields(user));
+	},
+
+	getToken: function(user, callback) {
+		var token = jwt.encode({
+			email: user.email,
+			name: user.name,
+			_id: user._id
+		}, "secret");
+
+		if (callback) callback(null, token);
+		return token;
 	}
 
 });

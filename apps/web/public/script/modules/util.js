@@ -33,8 +33,10 @@ define(function(
         document.cookie = name + "=" + value + expires + path;
       },
 
-      remove: function(name) {
-        this.set(name, "", { expires: 0 });
+      remove: function(name, options) {
+        options = options || {};
+        options.expires = 0;
+        this.set(name, "", options);
       },
 
       get: function(name) {

@@ -2,9 +2,12 @@
 var Controller = require('../../../lib/controller');
 var UserModel = require('../models/user');
 var User = new UserModel();
+var RoleModel = require('../models/role');
+var Role = new RoleModel();
 var passport = require('passport');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
+var _ = require('underscore');
 
 var credentialFields = {
 	usernameField: 'email',
@@ -21,7 +24,30 @@ var verifyToken = function(token, done) {
 	User.verifyToken(token, function(err, user) {
 		done(err, user);
 	});
-}
+};
+
+var has_permission = function(permission, callback) {
+	return function(req, res, next) {
+		if (!req.user) {
+			res.status(401).json({error: "Unauthorized"});
+		}
+		else {
+			User.get({email: req.user.email}, function(err, user) {
+				if (err)
+					res.status(400).json({error: err});
+				else
+					Role.has_permission(permission, user.roles || [], function(err, authorized) {
+						if (err)
+							res.status(400).json({error: err});
+						else if (!authorized)
+							res.status(401).json({error: "Unauthorized"});
+						else
+							callback(req, res, next);
+					});
+			});
+		}
+	};
+};
 
 module.exports = Controller.extend({
 
@@ -29,6 +55,8 @@ module.exports = Controller.extend({
 		this.name("user");
 		User.db(this.db());
 		User.index({ email: 1 }, {	unique: true });
+
+		Role.db(this.db());
 
 		passport.use(new LocalStrategy(credentialFields, verifyCredentials));
 		passport.use(new BearerStrategy(verifyToken));
@@ -42,34 +70,58 @@ module.exports = Controller.extend({
 			hash: req.body.hash
 		};
 
-		User.create(user, function(err, token, user) {
+		User.create(user, function(err, user) {
 			if (err) {
 				res.status(400).json({ error: err.toString() });
 			}
 			else {
-				res.cookie('tkn', token, { httpOnly: false });
+				res.cookie('tkn', User.getToken(user), { httpOnly: false });
 				res.json(user);
 			}
 		});
 	},
 
-	list: function(req, res, next) {
-  	User.list({}, function(err, users) {
-  		res.json(users);
-  	});
-  },
+	update: has_permission("edit_users", function(req, res, next) {
+		var user;
+		if (!req.params.id)
+			res.status(400).json({error: "Invalid request"});
+		else
+			user = _.extend({_id: User.objectID(req.params._id)}, req.body);
+			User.updateOne(user, function(err, user) {
+				if (err)
+					res.status(400).json({error: err});
+				else
+					res.json(user);
+			});
+  }),
 
-  delete: function(req, res, next) {
-  	this.db().collection("users").remove(function(){});
-  	res.status(200).end();
-  },	
+	list: has_permission("view_users", function(req, res, next) {
+		User.list({ roles: "user" }, function(err, users) {
+  		if (err)
+  			res.status(400).json({error: err});
+  		else
+  			res.json(users);
+  	});
+	}),
+
+	get: has_permission("view_users", function(req, res, next) {
+		if (!req.params.id)
+			res.status(400).json({error: "Invalid request"});
+		else
+			User.get({_id: User.objectID(req.params.id)}, function(err, user) {
+				if (err)
+					res.status(400).json({error: err});
+				else 
+					res.json(user);
+			});
+	}),
 
   authenticate: function(req, res, next) {
 		
 		passport.authenticate('local', function(err, user, info) {
 			if(err) return res.status(500).json({ error: err.toString() });
 			if(!user) return res.status(400).json({ error: "Invalid credentials" });
-			res.cookie('tkn', user.token, { httpOnly: false });
+			res.cookie('tkn', User.getToken(user), { httpOnly: false });
 			res.json({});
 		})(req, res, next);
   },
@@ -88,13 +140,30 @@ module.exports = Controller.extend({
   		User.get({email: req.user.email}, function(err, user) {
   			if (err)
   				res.status(400).json({error: err});
-  			else
+  			else {
+  				if (user)
+  					res.cookie('tkn', User.getToken(user), { httpOnly: false });
   				res.json(user);
+  			}
   		});
   	}
   	else {
   		res.status(400).json({error: "No user logged in"});
   	}
-  }
+  },
 
+  updateMe: function(req, res, next) {
+  	var user;
+  	if (!req.user)
+  		res.status(401).json({error: "Not logged in"});
+  	else {
+  		user = _.extend({_id: User.objectID(req.user._id)}, req.body);
+  		User.updateOne(user, function(err, user) {
+  			if (err)
+  				res.status(400).json({error: err});
+  			else
+  				res.json(user);
+  		});
+  	}
+  }
 });

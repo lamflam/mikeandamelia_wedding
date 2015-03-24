@@ -9,8 +9,7 @@ define([
   "util",
   "text!tmpl/user/user.html",
   "text!tmpl/user/userlist.html",
-  "text!tmpl/user/login.html",
-  "backbone-relational" 
+  "text!tmpl/user/login.html" 
 
 ], function(
 
@@ -49,6 +48,8 @@ define([
 
     url: function() { return "/api/users/me"; },
 
+    idAttribute: "_id",
+
     initialize: function() {
       this.fetch();
     },
@@ -59,13 +60,13 @@ define([
 
     logout: function() {
       this.clear();
-      util.cookie.remove("tkn");
+      util.cookie.remove("tkn", { path: '/' });
     }
 
   });
-  me = Users.me = new Me();
+  Users.me = new Me();
 
-  var User = Users.prototype.User = Backbone.RelationalModel.extend({
+  var User = Users.prototype.User = Backbone.Model.extend({
 
     urlRoot: '/api/users',
 
@@ -79,7 +80,7 @@ define([
       var attrs = _.omit(model.attributes, this.blacklist);
       options.data = JSON.stringify(attrs);
       options.contentType = "application/json";
-      Backbone.RelationalModel.prototype.sync.call(this, method, model, options);
+      Backbone.Model.prototype.sync.call(this, method, model, options);
     },
 
     validate: function(attributes, options) {
@@ -157,24 +158,26 @@ define([
     events: {
 
       "click #save-button": "save",
-      "change input": "update"
+      "change input,textarea,select": "update"
     },
 
     initialize: function() {
 
       _.bindAll(this, "render", "update");
-      this.model.on("change", this.render);
+      this.model.on("sync", this.render);
       this.model.on("invalid", this.render);
       this.model.fetch();
     },
 
     render: function() {
       var data = {
-        responded: this.model.get("rsvp") != undefined,
+        responded: this.model.get("rsvp") !== undefined,
+        going: this.model.get("rsvp") === 'yes',
         user: this.model.toJSON(),
         title: "Edit RSVP",
         button_text: "Save"
       };
+
       this.$el.html(this.template(data));
       return this;
     },
@@ -183,19 +186,23 @@ define([
       var field = $(e.currentTarget).attr("name");
       var value = $(e.currentTarget).val();
       var obj = {};
-
       obj[field] = value;
       this.model.set(obj);
     },
 
     save: function(e) {
       e.preventDefault();
+      this.model.save();
     }
   });
 
   var UserListView = Users.prototype.UserListView = Backbone.View.extend({
 
     template: Handlebars.compile( userlist_template ),
+
+    events: {
+      "click .guest": "edit"
+    },
 
     initialize: function() {
 
@@ -209,6 +216,13 @@ define([
       this.$el.html( this.template( { guests: this.collection.toJSON() } ) );
       return this;
     },
+
+    edit: function(e) {
+      var id = $(e.currentTarget).attr("id");
+      if (id) {
+        Backbone.history.navigate('/users/' + id, true);
+      }
+    }
 
   });
 
@@ -269,7 +283,8 @@ define([
 
     render: function() {
       var data = {
-        responded: this.model.get("rsvp") != undefined,
+        responded: this.model.get("rsvp") !== undefined,
+        going: this.model.get("rsvp") === 'yes',
         user: this.model.toJSON(),
         title: "New Guest",
         button_text: "Register",
