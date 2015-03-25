@@ -23,8 +23,10 @@ div#header(class='navbar navbar-default navbar-static-top')
           a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
             b.caret
           ul.dropdown-menu
+            {{#unless admin}}
             li
               a(href='/guests/me') Edit RSVP
+            {{/unless}}
             li
               a(href='/guests/logout') Logout
         {{else}}
