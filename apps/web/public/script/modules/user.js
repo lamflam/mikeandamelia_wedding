@@ -336,20 +336,17 @@ define([
 
     index: function() {
 
-      var view = new UserListView();
-      view.setElement($(this.selector)).render();
+      app.setView(new UserListView());
     },
 
     login: function() {
     
-      var view = new LoginView({model: new User()});
-      view.setElement($(this.selector)).render();
+      app.setView(new LoginView({model: new User()}));
     },
 
     register: function() {
     
-      var view = new RegisterView({model: new User()});
-      view.setElement($(this.selector)).render();
+      app.setView(new RegisterView({model: new User()}));
     },
 
     logout: function() {
@@ -360,14 +357,12 @@ define([
 
     editme: function() {
 
-      var view = new UserView({model: Users.me});
-      view.setElement($(this.selector)).render();
+      app.setView(new UserView({model: Users.me}));
     },
 
     edit: function(id) {
 
-      var view = new UserView({model: new User({_id: id})});
-      view.setElement($(this.selector)).render();
+      app.setView(new UserView({model: new User({_id: id})}));
     }
   });
 

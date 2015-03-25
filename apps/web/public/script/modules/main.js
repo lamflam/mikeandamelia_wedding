@@ -37,17 +37,19 @@ define([
   // the header and footer
   var Main = function() {
 
+    this.selector = "#content";
+
     // Unlike other modules, the main modules always loads
     // a view and the sub modules will attach their views
     // to it.
     var view = new MainView();
     view.setElement($("body")).render();
 
-    // This router is basically just for 404s
-    var router = new this.Router( "#content" );
-
     // Load submodules
-    var users = new Users( "#content" );
+    new Users( this.selector );
+
+    // start up our router
+    new this.Router( this.selector );
 
     Users.me.on("change", function(me) {
 
@@ -60,9 +62,23 @@ define([
       view.render("#header", { user: user, admin: admin } );
     });
 
-    Backbone.history.start( { pushState: true } );
-
     return this;
+  };
+
+  Main.prototype.start = function() {
+
+    Backbone.history.start( { pushState: true } );
+  },
+
+  Main.prototype.setView = function(view) {
+
+      if (this.view) {
+        this.view.remove();
+        delete this.view;
+      }
+
+      this.view = view;
+      $(this.selector).append(this.view.render().el);
   };
 
   var MainView = Main.prototype.MainView = Backbone.View.extend({
@@ -145,14 +161,12 @@ define([
 
     home: function() {
 
-      var view = new HomeView();
-      view.setElement($(this.selector)).render();
+      app.setView(new HomeView());
     },
 
     lodging: function() {
 
-      var view = new LodgingView();
-      view.setElement($(this.selector)).render();
+      app.setView(new LodgingView());
     }
 
   });
