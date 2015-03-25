@@ -45,11 +45,11 @@ define([
     var view = new MainView();
     view.setElement($("body")).render();
 
+    // Load our routes
+    new this.Router( this.selector );
+
     // Load submodules
     new Users( this.selector );
-
-    // start up our router
-    new this.Router( this.selector );
 
     Users.me.on("change", function(me) {
 
@@ -136,6 +136,18 @@ define([
     }
   });
 
+  var ErrorView = Main.prototype.LodgingView = Backbone.View.extend({
+
+    initialize: function(selector) {
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+      this.$el.html( "404" );
+      return this;
+    }
+  });
+
   // A generic router that just redirects to the current main
   // page. Right now it's the chooser, eventually it'll
   // the blog page.
@@ -156,7 +168,7 @@ define([
     error: function() { 
       
       if (Backbone.history.fragment)
-        Backbone.$(this.selector).html("404");
+        app.setView(new ErrorView());
     },
 
     home: function() {
