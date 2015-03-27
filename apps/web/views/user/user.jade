@@ -1,5 +1,9 @@
 h2.text-center {{title}}
 hr.col-xs-offset-3.col-xs-6
+{{#if new}}
+small.col-xs-offset-3.col-xs-6.text-center
+  | Already RSVP'd? <a href='/guests/login'>Login</a> to update your response.
+{{/if}}
 .user-form
   .col-xs-6.col-xs-offset-3
     .well

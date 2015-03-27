@@ -272,7 +272,7 @@ define([
     events: {
 
       "click #save-button": "register",
-      "change input": "update"
+      "change input,textarea,select": "update"
     },
 
     initialize: function() {
@@ -287,7 +287,7 @@ define([
         going: this.model.get("rsvp") === 'yes',
         user: this.model.toJSON(),
         title: "New Guest",
-        button_text: "Register",
+        button_text: "RSVP",
         new: true
       };
       this.$el.html(this.template(data));

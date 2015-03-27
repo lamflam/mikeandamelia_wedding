@@ -64,11 +64,7 @@ module.exports = Controller.extend({
 
 	create: function(req, res, next) {
 
-		var user = {
-			email: req.body.email,
-			name: req.body.name,
-			hash: req.body.hash
-		};
+		var user = req.body;
 
 		User.create(user, function(err, user) {
 			if (err) {

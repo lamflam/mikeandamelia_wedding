@@ -4,15 +4,31 @@ var MongoModel = require( '../../../lib/model' ).MongoModel;
 var jwt = require('jwt-simple');
 var _ = require('underscore');
 
-var privateFields = {
-	hash: 0,
-  salt: 0,
-	iter: 0
+var userFields = {
+	_id: true,
+	name: true,
+	email: true,
+	roles: true,
+	rsvp: true,
+	guests: true,
+	comment: true,
+	hash: false,
+	iter: false,
+	salt: false
 };
 
-var removePrivateFields = function(user, keep) {
-	var remove = _.omit(privateFields, keep || []);
-	return user ? _.omit(user, _.keys(remove)) : null;
+var publicFields = _.filter(_.keys(userFields),function(key) { 
+	return userFields[key]; 
+});
+
+var privateFields = _.keys(_.omit(userFields, publicFields));
+
+var removePrivateFields = function(user) {
+	return user ? _.omit(user, privateFields) : null;
+};
+
+var stripExtraFields = function(user) {
+	return _.pick(user, _.keys(userFields));
 };
 
 var generateHash = function( user, callback ) {
@@ -36,16 +52,20 @@ module.exports = MongoModel.extend({
   },
 
   list: function(query, callback) {
-  	return this.find(query, privateFields, callback);
+  	var project = {};
+  	_.each(publicFields, function(field) { project[field] = 1; });
+  	return this.find(query, project, callback);
   },
 
   get: function(query, callback) {
-  	console.log()
-  	return this.findOne(query, privateFields, callback);
+  	var project = {};
+  	_.each(publicFields, function(field) { project[field] = 1; });
+  	return this.findOne(query, project, callback);
   },
 
   create: function( user, callback ) {
 
+  	var user = stripExtraFields(user);
   	var $this = this;
   	
   	if (!user.roles) {
@@ -67,7 +87,7 @@ module.exports = MongoModel.extend({
   updateOne: function(user, callback) {
 
   	// email cannot be changed
-  	var user = _.clone(user);
+  	var user = stripExtraFields(user);
   	var email = user.email;
   	delete user.email;
   	delete user._id;

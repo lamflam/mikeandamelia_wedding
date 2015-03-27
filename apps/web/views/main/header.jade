@@ -13,25 +13,25 @@ div#header(class='navbar navbar-default navbar-static-top')
           a(href='/') Home
         li
           a(href='/lodging') Lodging
+      ul.nav.navbar-nav.navbar-right
         {{#if admin}}
         li
           a(href='/guests') Guest List
         {{/if}}
-      ul.nav.navbar-nav.navbar-right
         {{#if user}}
+        {{#unless admin}}
+        li
+          a(href='/guests/me') Edit RSVP
+        {{/unless}}
         li.dropdown
           a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
             b.caret
           ul.dropdown-menu
-            {{#unless admin}}
-            li
-              a(href='/guests/me') Edit RSVP
-            {{/unless}}
             li
               a(href='/guests/logout') Logout
         {{else}}
         li
           a(href='/guests/login') Login
         li
-          a(href='/guests/register') Register
+          a(href='/guests/register') RSVP
         {{/if}}
