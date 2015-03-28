@@ -204,7 +204,8 @@ define([
     template: Handlebars.compile( userlist_template ),
 
     events: {
-      "click .guest": "edit"
+      "click .guest": "edit",
+      "click button.delete": "delete"
     },
 
     initialize: function() {
@@ -213,6 +214,7 @@ define([
       this.collection.fetch({reset: true});
       _.bindAll(this, "render");
       this.collection.bind("reset", this.render);
+      this.collection.bind("remove", this.render);
     },
 
     render: function() {
@@ -225,6 +227,12 @@ define([
       if (id) {
         Backbone.history.navigate('/users/' + id, true);
       }
+    },
+
+    delete: function(e) {
+      e.stopPropagation();
+      var id = $(e.currentTarget).parents("tr.guest").attr("id");
+      this.collection.get(id).destroy();
     }
 
   });

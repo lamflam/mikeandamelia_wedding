@@ -112,6 +112,18 @@ module.exports = Controller.extend({
 			});
 	}),
 
+	delete: has_permission("delete_users", function(req, res, next) {
+		if (!req.params.id)
+			res.status(400).json({error: "Invalid request"});
+		else
+			User.delete({_id: User.objectID(req.params.id)}, function(err, deleted) {
+				if (err)
+					res.status(400).json({error: err});
+				else 
+					res.status(200).end();
+			});
+	}),
+
   authenticate: function(req, res, next) {
 		
 		passport.authenticate('local', function(err, user, info) {
@@ -158,7 +170,7 @@ module.exports = Controller.extend({
   			if (err)
   				res.status(400).json({error: err});
   			else
-  				res.json(user);
+  				res.status(200).end();
   		});
   	}
   }

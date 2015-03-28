@@ -8,6 +8,7 @@ hr.col-xs-offset-3.col-xs-6
         th.email-column Email
         th.guests-column Guests
         th.rsvp-column RSVP
+        th 
     tbody
       {{#each guests}}
       tr.guest(id="{{this._id}}")
@@ -15,4 +16,6 @@ hr.col-xs-offset-3.col-xs-6
         td {{this.email}}
         td {{this.guests}}
         td {{this.rsvp}}
+        td.text-center
+          button.btn-xs.btn-danger.delete Delete
       {{/each}}

@@ -54,13 +54,13 @@ module.exports = MongoModel.extend({
   list: function(query, callback) {
   	var project = {};
   	_.each(publicFields, function(field) { project[field] = 1; });
-  	return this.find(query, project, callback);
+  	return this.find(query, {fields: project}, callback);
   },
 
   get: function(query, callback) {
   	var project = {};
   	_.each(publicFields, function(field) { project[field] = 1; });
-  	return this.findOne(query, project, callback);
+  	return this.findOne(query, {fields: project}, callback);
   },
 
   create: function( user, callback ) {
@@ -101,6 +101,15 @@ module.exports = MongoModel.extend({
   	else {
   		callback("Invalid data");
   	}
+  },
+
+  delete: function(user, callback) {
+
+  	if (!user._id) {
+  		callback("Must provide id to delete user.");
+  	}
+  	else
+  		this.remove(user, callback);
   },
 
   validate: function( user, isNew ) {
