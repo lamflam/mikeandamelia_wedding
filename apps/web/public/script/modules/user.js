@@ -102,14 +102,16 @@ define([
         error.name = "Must enter your name";
       }
 
-      if (password.length < 6) {
-        error = error || {};
-        error.password = "Password must be at least 6 characters";
-      }
+      if (this.isNew()) {
+        if (password.length < 6) {
+          error = error || {};
+          error.password = "Password must be at least 6 characters";
+        }
 
-      if (password !== password2) {
-        error = error || {};
-        error.password2 = "Passwords don't match";
+        if (password !== password2) {
+          error = error || {};
+          error.password2 = "Passwords don't match";
+        }
       }
 
       this.set('error', error);
@@ -192,6 +194,7 @@ define([
 
     save: function(e) {
       e.preventDefault();
+      console.log("save", this.model);
       this.model.save();
     }
   });
