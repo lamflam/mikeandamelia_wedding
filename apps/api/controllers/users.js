@@ -7,6 +7,7 @@ var Role = new RoleModel();
 var passport = require('passport');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
+var nodemailer = require('nodemailer');
 var _ = require('underscore');
 
 var credentialFields = {
@@ -130,7 +131,7 @@ module.exports = Controller.extend({
 			if(err) return res.status(500).json({ error: err.toString() });
 			if(!user) return res.status(400).json({ error: "Invalid credentials" });
 			res.cookie('tkn', User.getToken(user), { httpOnly: false });
-			res.json({});
+			res.status(200).end();
 		})(req, res, next);
   },
 
@@ -141,6 +142,63 @@ module.exports = Controller.extend({
 			next();
 		})(req, res, next);
   },
+
+  resetToken: function(req, res, next) {
+  	var $this = this;
+  	var email = req.params.email;
+		if (!email)
+			res.status(400).json({error: "Invalid parameters"});
+		else
+			User.resetToken(email, function(err, token) {
+				if (err)
+					res.status(400).json({error: err});
+				else
+					$this.sendResetEmail(email, token, function(err) {
+						if (err)
+							res.status(400).json({error: "Unable to send email"});
+						else
+							res.status(200).end();
+					});
+			});
+  },
+
+  resetPassword: function(req, res, next) {
+  	var email = req.params.email;
+  	var hash = req.body.hash;
+  	var token = req.body.token;
+  	if (!token || !hash)
+  		res.status(400).json({error: "Invalid parameters"});
+  	else
+  		User.resetPassword(email, token, hash, function(err,user) {
+  			if(err)
+  				res.status(400).json({error: err});
+  			else
+  				res.status(200).end();
+  		});
+  },
+
+  sendResetEmail: function(email, token, callback) {
+		
+		var smtp = this.config("smtp");
+
+		this._mailer = this._mailer || 
+			nodemailer.createTransport(_.clone(smtp));
+
+		this._mailer.sendMail({
+			from: smtp.auth.user,
+			to: email,
+			subject: 'Password reset request',
+			text: 'To reset your password, please click on the link below.\n ' + 
+						'localhost:3001/users/' + encodeURIComponent(email) + '/reset_password?token=' + token,
+			html: '<p>Hello,<br>Please click <a href="http://' + this.config("domain") + '/users/' + 
+						encodeURIComponent(email) + '/reset_password?token=' + token + '">here</a> to reset your password.</p>',
+		}, function(err, info) {
+			if (err)
+				callback(err);
+			else
+				callback(null,info.messageId);
+		});
+	},
 
   me: function(req, res, next) {
 

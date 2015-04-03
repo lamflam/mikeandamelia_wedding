@@ -14,7 +14,8 @@ var userFields = {
 	comment: true,
 	hash: false,
 	iter: false,
-	salt: false
+	salt: false,
+	reset_token: false
 };
 
 var publicFields = _.filter(_.keys(userFields),function(key) { 
@@ -163,6 +164,64 @@ module.exports = MongoModel.extend({
 
 		if (callback) callback(null, token);
 		return token;
+	},
+
+	resetToken: function(email, callback) {
+		
+		if (!email) {
+			callback({error: "No user provided"});
+			return;
+		}
+
+		var date = new Date();
+		// Set to expire after a day
+		date.setTime(date.getTime() + (24 * 3600 * 1000));
+		var token = jwt.encode({
+			rand: crypto.randomBytes(16).toString('Base64'),
+			expires: date
+		}, "password_secret");
+
+ 		this.findAndModify(
+ 			{email: email}, 
+ 			[['_id',1]], 
+ 			{$set: {password_reset_token: token}}, 
+ 			{new: true}, 
+ 			function(err, user) {
+				if (err)
+					callback(err);
+				else
+					callback(null, token);
+  		}
+  	);
+	},
+
+	resetPassword: function(email, token, newPassword, callback) {
+
+		var $this = this;
+		var info = jwt.decode(token, "password_secret");
+		
+		var now = Date.now();
+		var expires = new Date(info.expires);
+		if (now > expires)
+			callback("expired");
+		else
+			generateHash({hash: newPassword}, function(err, user) {
+				if (err)
+					callback(err);
+				else
+					$this.findAndModify(
+						{email: email, password_reset_token: token},  
+						[['_id',1]],
+				    {$set: user, $unset: {password_reset_token: ''}},
+				    {new: true},
+				    function(err, user) {
+							if (err)
+								callback(err);
+							else
+								callback(null, removePrivateFields(user));
+			  		}
+			  	);
+			});
 	}
 
 });

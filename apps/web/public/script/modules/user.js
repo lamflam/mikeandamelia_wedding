@@ -44,6 +44,8 @@ define([
     return this;
   };
 
+  Users.rEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;        //'  // This fublime's syntax coloring 
+
   var Me = Backbone.Model.extend({
 
     url: function() { return "/api/users/me"; },
@@ -74,32 +76,36 @@ define([
 
     blacklist: ['password', 'password2', 'error'],
 
+    getData: function() {
+      return _.omit(this.attributes, this.blacklist);
+    },
+
     sync: function(method, model, options) {
       options = options || {};
 
-      var attrs = _.omit(model.attributes, this.blacklist);
-      options.data = JSON.stringify(attrs);
+      options.data = JSON.stringify(model.getData());
       options.contentType = "application/json";
       Backbone.Model.prototype.sync.call(this, method, model, options);
     },
 
     validate: function(attributes, options) {
-
+      options = options || {};
       var error;
       var email = attributes.email;
       var name = attributes.name;
       var password = attributes.password || "";
       var password2 = attributes.password2 || "";
-      var rEmail = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;        //'  // This fublime's syntax coloring 
 
-      if (!rEmail.test(email)) {
+      if (!Users.rEmail.test(email)) {
         error = error || {};
         error.email = "Invalid email address";
       }
 
-      if (!name) {
-        error = error || {};
-        error.name = "Must enter your name";
+      if (!options.reset) {
+        if (!name) {
+          error = error || {};
+          error.name = "Must enter your name";
+        }
       }
 
       if (this.isNew()) {
@@ -125,24 +131,58 @@ define([
       var hash = new Hash(password + email, "TEXT").getHash("SHA-512","B64");
       this.set('hash', hash);
       this.save(null, {
-        success: success
+        success: success,
+        error: error
       });
     },
 
     login: function(success, error) {
 
-      var $this = this;
       var password = this.get('password');
       var email = this.get('email');
       var hash = new Hash(password + email, "TEXT").getHash("SHA-512","B64");
       this.set('hash', hash);
-      this.save(null, {
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(this.getData()),
+        url: '/api/users/authenticate',
         success: success,
-        validate: false,
-        url: this.url() + '/authenticate'
+        error: error
+      });
+    },
+
+    resetToken: function(success, error) {
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(this.getData()),
+        url: '/api/users/' + encodeURIComponent(this.get('email')) + '/reset_token',
+        success: success,
+        error: error
+      });
+    },
+
+    resetPassword: function(success, error) {
+
+      if (this.validate(this.attributes, {reset: true})) {
+        error();
+        return;
+      }
+
+      var password = this.get('password');
+      var email = this.get('email');
+      var hash = new Hash(password + email, "TEXT").getHash("SHA-512","B64");
+      this.set('hash', hash);
+      $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(this.getData()),
+        url: '/api/users/' + encodeURIComponent(email) + '/password',
+        success: success,
+        error: error
       });
     }
-
   });
   
   var UserList = Users.prototype.UserList = Backbone.Collection.extend({
@@ -194,7 +234,6 @@ define([
 
     save: function(e) {
       e.preventDefault();
-      console.log("save", this.model);
       this.model.save();
     }
   });
@@ -243,18 +282,21 @@ define([
 
     events: {
 
-      "click button.login": "login",
+      "click #login-button": "login",
+      "click #reset-token-button": "resetToken",
+      "click #reset-password-button": "resetPassword",
       "change input": "update"
     },
 
-    initialize: function() {
-
+    initialize: function(options) {
+      options = options || {};
+      this.passwordReset = options.passwordReset;
       _.bindAll(this, "render", "update");
     },
 
     render: function() {
 
-      this.$el.html( this.template() );
+      this.$el.html( this.template({user: this.model.getData(), reset: this.passwordReset}) );
       return this;
     },
 
@@ -272,6 +314,28 @@ define([
       this.model.login(function(model, user) {
         Users.me.fetch();
         Backbone.history.navigate("/", true);
+      });
+    },
+
+    resetToken: function(e) {
+      e.preventDefault();
+      if (!Users.rEmail.test(this.model.get('email'))) {
+        $("#reset-email-error-modal").modal();
+      }
+      else
+        this.model.resetToken(function() {
+          $("#reset-success-modal").modal();
+        },function() {
+        $("#reset-error-modal").modal();
+      });
+    },
+
+    resetPassword: function(e) {
+      e.preventDefault();
+      this.model.resetPassword(function() {
+        Backbone.history.navigate("/guests/login", true);
+      },function() {
+        $("#reset-error-modal").modal();
       });
     }
   });
@@ -341,8 +405,10 @@ define([
       "guests/logout": "logout",
       "users/me": "editme",
       "guests/me": "editme",
-      "users/:id": "edit",
-      "guests/:id": "edit"
+      "users/([0-9A-Fa-f]+)": "edit",
+      "guests/([0-9A-Fa-f]+)": "edit",
+      "users/:email/reset_password?token=:token": "resetPassword",
+      "guests/:email/reset_password?token=:token": "resetPassword"
     },
 
     index: function() {
@@ -374,6 +440,10 @@ define([
     edit: function(id) {
 
       app.setView(new UserView({model: new User({_id: id})}));
+    },
+
+    resetPassword: function(email, token) {
+      app.setView(new LoginView({model: new User({email: email, token: token}), passwordReset: true}));
     }
   });
 
