@@ -27,7 +27,7 @@ var verifyToken = function(token, done) {
 	});
 };
 
-var has_permission = function(permission, callback) {
+var hasPermission = function(permission, callback) {
 	return function(req, res, next) {
 		if (!req.user) {
 			res.status(401).json({error: "Unauthorized"});
@@ -37,7 +37,7 @@ var has_permission = function(permission, callback) {
 				if (err)
 					res.status(400).json({error: err});
 				else
-					Role.has_permission(permission, user.roles || [], function(err, authorized) {
+					Role.hasPermission(permission, user.roles || [], function(err, authorized) {
 						if (err)
 							res.status(400).json({error: err});
 						else if (!authorized)
@@ -78,7 +78,7 @@ module.exports = Controller.extend({
 		});
 	},
 
-	update: has_permission("edit_users", function(req, res, next) {
+	update: hasPermission("edit_users", function(req, res, next) {
 		var user;
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
@@ -92,7 +92,7 @@ module.exports = Controller.extend({
 			});
   }),
 
-	list: has_permission("view_users", function(req, res, next) {
+	list: hasPermission("view_users", function(req, res, next) {
 		User.list({ roles: "user" }, function(err, users) {
   		if (err)
   			res.status(400).json({error: err});
@@ -101,7 +101,7 @@ module.exports = Controller.extend({
   	});
 	}),
 
-	get: has_permission("view_users", function(req, res, next) {
+	get: hasPermission("view_users", function(req, res, next) {
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
 		else
@@ -113,7 +113,7 @@ module.exports = Controller.extend({
 			});
 	}),
 
-	delete: has_permission("delete_users", function(req, res, next) {
+	delete: hasPermission("delete_users", function(req, res, next) {
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
 		else
@@ -232,4 +232,6 @@ module.exports = Controller.extend({
   		});
   	}
   }
+}, {
+	hasPermission: hasPermission
 });

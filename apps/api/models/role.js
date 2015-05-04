@@ -22,7 +22,7 @@ module.exports = MongoModel.extend({
   	});
   },
 
-  has_permission: function(permission, roles, callback) {
+  hasPermission: function(permission, roles, callback) {
 
   	this.permissions(roles, function(err, permissions) {
   		if (err)

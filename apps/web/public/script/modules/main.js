@@ -5,6 +5,7 @@ define([
   "jquery",
   "handlebars",
   "user",
+  //"convo",
   "text!tmpl/main/body.html",
   "text!tmpl/main/home.html",
   "text!tmpl/main/lodging.html"
@@ -15,6 +16,7 @@ define([
   $,
   Handlebars,
   Users,
+  //Convos,
   body_template,
   home_template,
   lodging_template
@@ -50,6 +52,7 @@ define([
 
     // Load submodules
     new Users( this.selector );
+    //new Convos( this.selector );
 
     Users.me.on("change", function(me) {
 

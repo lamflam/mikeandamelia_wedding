@@ -8,7 +8,7 @@ define([
   "hash",
   "util",
   "text!tmpl/user/user.html",
-  "text!tmpl/user/userlist.html",
+  "text!tmpl/user/list.html",
   "text!tmpl/user/login.html" 
 
 ], function(
@@ -20,7 +20,7 @@ define([
   Hash,
   util,
   user_template,
-  userlist_template,
+  list_template,
   login_template
 
 ) {
@@ -240,7 +240,7 @@ define([
 
   var UserListView = Users.prototype.UserListView = Backbone.View.extend({
 
-    template: Handlebars.compile( userlist_template ),
+    template: Handlebars.compile( list_template ),
 
     events: {
       "click .guest": "edit",

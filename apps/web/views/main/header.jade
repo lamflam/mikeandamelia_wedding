@@ -6,13 +6,7 @@ div#header(class='navbar navbar-default navbar-static-top')
         span.icon-bar
         span.icon-bar
         span.icon-bar
-      a.navbar-brand(href='/') Mike and Amelia
     .navbar-collapse.collapse
-      ul.nav.navbar-nav
-        li
-          a(href='/') Home
-        li
-          a(href='/lodging') Lodging
       ul.nav.navbar-nav.navbar-right
         {{#if admin}}
         li
@@ -31,7 +25,13 @@ div#header(class='navbar navbar-default navbar-static-top')
               a(href='/guests/logout') Logout
         {{else}}
         li
-          a(href='/guests/login') Login
-        li
           a(href='/guests/register') RSVP
         {{/if}}
+        li
+          a(href='/lodging') Lodging
+        li
+          a(href='/what_to_expect') What to Expect
+        li
+          a(href='/photo_help') Photography Help
+        li
+          a(href='/contact') Contact
