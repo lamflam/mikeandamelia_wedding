@@ -405,8 +405,8 @@ define([
       "guests/logout": "logout",
       "users/me": "editme",
       "guests/me": "editme",
-      "users/([0-9A-Fa-f]+)": "edit",
-      "guests/([0-9A-Fa-f]+)": "edit",
+      "users/:id": "edit",
+      "guests/:id": "edit",
       "users/:email/reset_password?token=:token": "resetPassword",
       "guests/:email/reset_password?token=:token": "resetPassword"
     },
