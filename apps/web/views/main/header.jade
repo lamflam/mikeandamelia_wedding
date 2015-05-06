@@ -7,7 +7,8 @@ div#header(class='navbar navbar-default navbar-static-top')
         span.icon-bar
         span.icon-bar
     .navbar-brand
-      img#logo(src='/img/logo-white.png')
+      a(href='/')
+        img#logo(src='/img/logo-white.png')
     .navbar-collapse.collapse
       ul.nav.navbar-nav.navbar-right
         {{#if admin}}
@@ -34,6 +35,6 @@ div#header(class='navbar navbar-default navbar-static-top')
         li
           a(href='/what_to_expect') What to Expect
         li
-          a(href='/photo_help') Photography Help
+          a(href='/photography') Photography Help
         li
           a(href='/contact') Contact

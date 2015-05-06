@@ -8,7 +8,9 @@ define([
   //"convo",
   "text!tmpl/main/body.html",
   "text!tmpl/main/home.html",
-  "text!tmpl/main/lodging.html"
+  "text!tmpl/main/lodging.html",
+  "text!tmpl/main/photo.html",
+  "text!tmpl/main/what_to_expect.html"
 
 ], function( 
 
@@ -19,7 +21,9 @@ define([
   //Convos,
   body_template,
   home_template,
-  lodging_template
+  lodging_template,
+  photo_template,
+  what_to_expect_template
 
 ) {
 
@@ -139,6 +143,40 @@ define([
     }
   });
 
+  var PhotoView = Main.prototype.PhotoView = Backbone.View.extend({
+
+    template: Handlebars.compile( photo_template ),
+
+    initialize: function(selector) {
+      
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+
+      this.$el.html( this.template() );
+
+      return this;
+    }
+  });
+
+  var WhatToExpectView = Main.prototype.PhotoView = Backbone.View.extend({
+
+    template: Handlebars.compile( what_to_expect_template ),
+
+    initialize: function(selector) {
+      
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+
+      this.$el.html( this.template() );
+
+      return this;
+    }
+  });
+
   var ErrorView = Main.prototype.LodgingView = Backbone.View.extend({
 
     initialize: function(selector) {
@@ -165,6 +203,8 @@ define([
       '': 'home',
       'home': 'home',
       'lodging': 'lodging',
+      'photography': 'photography',
+      'what_to_expect': 'whatToExpect',
       '*404': 'error'
     },
 
@@ -182,6 +222,16 @@ define([
     lodging: function() {
 
       app.setView(new LodgingView());
+    },
+
+    photography: function() {
+
+      app.setView(new PhotoView());
+    },
+
+    whatToExpect: function() {
+
+      app.setView(new WhatToExpectView());
     }
 
   });
