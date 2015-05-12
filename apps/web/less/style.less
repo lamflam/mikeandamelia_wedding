@@ -49,7 +49,7 @@ body {
 }
 
 .text-larger {
-  font-size: 1.3em;;
+  font-size: 1.3em;
 }
 
 .text-blue {
@@ -69,8 +69,29 @@ body {
 
 .navbar a {
 	color: @text-color !important;
-	font-size: 1.2em;
-	font-weight: bold;
+	font-size: 12px;
+	/*font-weight: bold;*/
+  letter-spacing: 0.1em;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+    .navbar-centered .navbar-nav {
+        float: none;
+        text-align: center;
+    }
+    .navbar-centered .navbar-nav > li {
+        float: none;
+    }
+    .navbar-centered .nav > li {
+        display: inline;
+    }
+    .navbar-centered .nav > li > a {
+        display: inline-block;
+    }
 }
 
 #content {
@@ -78,7 +99,7 @@ body {
   margin-bottom: @footer-height;
 }
 
-#logo {
+.logo {
 	width: 180px;
 }
 

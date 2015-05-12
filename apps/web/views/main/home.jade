@@ -5,30 +5,29 @@
 .main-container
   .container
     .row#welcome.col-sm-12.text-center
-      .text-blue
-        | Beloved family & friends~<br>
-        | <br>
-        | We hope that you will join us for a wonderful evening of merriment and marriage on September 19, 2015.<br>
-        | <br>
-        | The ceremony will begin at 2 PM with reception to follow, both to be held at:<br>
-        | <br>
-        | Sunny Slope Farm<br>
-        | <br>
-        | 118 Old Wolfeboro Road<br>
-        | <br>
-        | Alton, NH 03809<br>
-        | <br>
-        | Please use this website as a resource for anything you’d like to know about our special day.<br>
-        | <br>
-        | (And don’t forget to RSVP above!)<br>
-        | <br>
-        | We can't wait to see all of you there! <br>
-        | <br>
-        | Love,<br>
-        | <br>
-        | Mike & Amelia<br>
+      img(class='col-sm-10 col-sm-offset-1',src='/img/invite.png')
   .container
     .row#images
+      .col-sm-4
+        .image
+          img(src='/img/pallet.jpg')
+          #pallet-banner.img-banner Expect a rustic & cozy setting
+      .col-sm-4
+        .image
+          img(src='/img/winebar.jpg')
+      .col-sm-4
+        .image
+          img(src='/img/buffet1.jpg')
+          #buffet-banner.img-banner
+            | Plan on eating lunch before your arrival, we will supply a healthy buffet style dinner with all sorts
+            | of snacks and desserts.
+    .row
+      .col-sm-4
+        .image
+          img(src='/img/foodtruck.jpg')
+          #foodtruck-banner.img-banner
+            | A local food vendor will be coming by late night to supply some much needed nourishment to help offset 
+            | the booze! Have some cash ready!
       .col-sm-4
         .image
          img(src='/img/honeymoon.jpg')
@@ -37,14 +36,63 @@
            | of gifts help send us on a honeymoon!
       .col-sm-4
         .image
-          img(src='/img/winebar.jpg')
-      .col-sm-4
-        .image
-          img(src='/img/pallet.jpg')
-          #pallet-banner.img-banner Expect a rustic & cozy setting
-      .col-sm-4
-        .image
           img(src='/img/winebucket.jpg')
           #winebucket-banner.img-banner
             | Please bring your favorite bottle of wine or alcohol!
             | We will be providing beer.
+    .row
+      .col-sm-4
+        .image
+          img(src='/img/photography2.jpg')
+          #photography-banner.img-banner
+            | Check out the ‘Photography Help’ tab at the top of the page to see how you can help us capture 
+            | our big day
+      .col-sm-4
+        .image
+          img(src='/img/contact3.jpg')
+          #contact-banner.img-banner
+            | Use the ‘Contact’ tab at the top of the page for any further questions
+      .col-sm-4
+        .image
+          img(src='/img/dog.jpg')
+          #dog-banner.img-banner
+            | Dog's are welcome!
+    .row
+      .col-sm-12
+        .image
+          img(src='/img/beach.jpg')
+          #beach-banner.img-banner
+            | Nothing is possible without good friends – Many hands make the work light
+    footer.navbar.navbar-default.navbar-centered
+      ul.nav.navbar-nav
+        {{#if admin}}
+        li
+          a(href='/guests') Guest List
+        {{/if}}
+        {{#if user}}
+        {{#unless admin}}
+        li
+          a(href='/guests/me') Edit RSVP
+        {{/unless}}
+        li.dropdown
+          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
+            b.caret
+          ul.dropdown-menu
+            li
+              a(href='/guests/logout') Logout
+        {{else}}
+        li
+          a(href='/guests/register') RSVP
+        {{/if}}
+        li
+          a(href='/lodging') LODGING
+        li
+          a(href='/what_to_expect') WHAT TO EXPECT
+        li
+          a(href='/photography') PHOTOGRAPHY HELP
+        li
+          a(href='/contact') CONTACT
+      .navbar-brand.col-sm-12.text-center
+        a(href='/')
+          img.logo(src='/img/logo-white.png')
+
