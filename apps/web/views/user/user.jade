@@ -1,4 +1,4 @@
-#main 
+#main.row
   h2.text-center {{title}}
   hr
   .user-form
@@ -6,8 +6,12 @@
       .well.text-blue
         {{#if new}}
         #already.text-center.col-xs-12
-          small.col-xs-offset-3.col-xs-6.text-center
+          .col-xs-offset-3.col-xs-6.text-center
             | Already RSVP'd? <a href='/guests/login'>Login</a> to update your response.
+        {{else}}
+        #already.text-center.col-xs-12
+          .col-xs-offset-3.col-xs-6.text-center
+            | Not you? <a href='/guests/logout'>Logout</a>. 
         {{/if}}
         form.form-horizontal(action='#')
           .form-group(class='{{#if error.name}}has-error{{/if}}')
@@ -55,3 +59,20 @@
           .form-group.text-center
             .col-xs-3.center-btn#save-button
               button.btn.btn-dark {{button_text}}
+.modal.fade#rsvp-success
+  .modal-dialog.modal-sm
+    .modal-content
+      .modal-body
+        | Thanks! Your RSVP has been saved.
+      .modal-footer.text-center
+        button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
+.modal.fade#rsvp-error
+  .modal-dialog.modal-sm
+    .modal-content
+      .modal-body
+        | There was an error saving your RSVP.<br><br>
+        | If you've already RSVP'd, please <a href="/guests/login">Login</a>.<br><br>
+        | If not, make sure that you've entered your name and 
+        | that you're password is at least 6 characters long.
+      .modal-footer.text-center
+        button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok

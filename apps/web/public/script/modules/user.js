@@ -353,7 +353,7 @@ define([
     initialize: function() {
 
       _.bindAll(this, "render", "update");
-      this.model.on("invalid", this.render);
+      this.model.on("invalid", function() { $("#rsvp-error").modal(); });
     },
 
     render: function() {
@@ -382,7 +382,12 @@ define([
       e.preventDefault();
       this.model.register(function(model, user) {
         Users.me.login(user);
-        Backbone.history.navigate("/", true);
+        $("#rsvp-success").modal();
+        $("#rsvp-success").on('hidden.bs.modal',function(){
+          Backbone.history.navigate("/", true);
+        });
+      }, function() {
+        $("#rsvp-error").modal();
       });
     }
   });
@@ -422,8 +427,12 @@ define([
     },
 
     register: function() {
-    
-      app.setView(new RegisterView({model: new User()}));
+      if (Users.me.get('_id')) {
+        Backbone.history.navigate('/guests/me', {trigger: true, replace: true});
+      }
+      else {
+        app.setView(new RegisterView({model: new User()}));
+      }
     },
 
     logout: function() {

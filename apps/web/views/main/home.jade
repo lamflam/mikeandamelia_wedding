@@ -1,5 +1,5 @@
-#main
-  .vertical-align.text-center
+#main.row
+  .text-center#celebrate-container
     #celebrate CELEBRATE LOVE
     a.btn.btn-dark#home-rsvp(href='/guests/register') RSVP
 .main-container
@@ -63,36 +63,5 @@
           img(src='/img/beach.jpg')
           #beach-banner.img-banner
             | Nothing is possible without good friends – Many hands make the work light
-    footer.navbar.navbar-default.navbar-centered
-      ul.nav.navbar-nav
-        {{#if admin}}
-        li
-          a(href='/guests') Guest List
-        {{/if}}
-        {{#if user}}
-        {{#unless admin}}
-        li
-          a(href='/guests/me') Edit RSVP
-        {{/unless}}
-        li.dropdown
-          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
-            b.caret
-          ul.dropdown-menu
-            li
-              a(href='/guests/logout') Logout
-        {{else}}
-        li
-          a(href='/guests/register') RSVP
-        {{/if}}
-        li
-          a(href='/lodging') LODGING
-        li
-          a(href='/what_to_expect') WHAT TO EXPECT
-        li
-          a(href='/photography') PHOTOGRAPHY HELP
-        li
-          a(href='/contact') CONTACT
-      .navbar-brand.col-sm-12.text-center
-        a(href='/')
-          img.logo(src='/img/logo-white.png')
+
 
