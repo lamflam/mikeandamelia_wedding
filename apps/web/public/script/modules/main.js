@@ -69,6 +69,7 @@ define([
       admin = user && user.roles.indexOf("admin") !== -1;
 
       view.render("#header", { user: user, admin: admin } );
+      view.render("#footer", { user: user, admin: admin } );
     });
 
     return this;
@@ -102,7 +103,7 @@ define([
     render: function( partial, data ) {
 
       if (partial) {
-        $(partial).html( $(this.template( data )).filter(partial).html() );
+        $(partial).html( $(this.template( data )).find(partial).html() );
       }
       else {
         this.$el.html( this.template( data ) );

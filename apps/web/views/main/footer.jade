@@ -2,19 +2,13 @@ footer#footer.navbar.navbar-default.navbar-centered
   ul.nav.navbar-nav
     {{#if admin}}
     li
-      a(href='/guests') Guest List
+      a(href='/guests') GUEST LIST
     {{/if}}
     {{#if user}}
     {{#unless admin}}
     li
-      a(href='/guests/me') Edit RSVP
+      a(href='/guests/me') RSVP
     {{/unless}}
-    li.dropdown
-      a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
-        b.caret
-      ul.dropdown-menu
-        li
-          a(href='/guests/logout') Logout
     {{else}}
     li
       a(href='/guests/register') RSVP
@@ -24,9 +18,16 @@ footer#footer.navbar.navbar-default.navbar-centered
     li
       a(href='/what_to_expect') WHAT TO EXPECT
     li
-      a(href='/photography') PHOTOGRAPHY HELP
+      a(href='/photography') PHOTOGRPAHY HELP
     li
       a(href='/contact') CONTACT
+    {{#if user}}
+    li
+      a(href='/guests/logout') LOGOUT
+    {{else}}
+    li
+      a(href='/guests/login') LOGIN
+    {{/if}}
   .navbar-brand.col-sm-12.text-center
     a(href='/')
       img.logo(src='/img/logo-white.png')
