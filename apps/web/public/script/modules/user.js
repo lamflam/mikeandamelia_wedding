@@ -244,7 +244,7 @@ define([
 
     events: {
       "click .guest": "edit",
-      "click button.delete": "delete"
+      "click .button.delete": "delete"
     },
 
     initialize: function() {
@@ -271,9 +271,16 @@ define([
     delete: function(e) {
       e.stopPropagation();
       var id = $(e.currentTarget).parents("tr.guest").attr("id");
-      this.collection.get(id).destroy();
+      var that = this;
+      $("#confirm-delete").modal();
+      $("#confirm-delete").find('.btn-ok')
+        .one('click', function() {
+          $("#confirm-delete").one('hidden.bs.modal',function() { 
+            that.collection.get(id).destroy();
+          });
+          $("#confirm-delete").modal('hide');
+        });
     }
-
   });
 
   var LoginView = Users.prototype.LoginView = Backbone.View.extend({
