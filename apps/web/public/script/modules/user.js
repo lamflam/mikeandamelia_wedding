@@ -63,7 +63,14 @@ define([
     logout: function() {
       this.clear();
       util.cookie.remove("tkn", { path: '/' });
-    }
+    },
+
+    update: function(success, error) {
+      this.save(null, {
+        success: success,
+        error: error
+      });
+    },
 
   });
   Users.me = new Me();
@@ -130,6 +137,13 @@ define([
       var email = this.get('email');
       var hash = new Hash(password + email, "TEXT").getHash("SHA-512","B64");
       this.set('hash', hash);
+      this.save(null, {
+        success: success,
+        error: error
+      });
+    },
+
+    update: function(success, error) {
       this.save(null, {
         success: success,
         error: error
@@ -207,7 +221,7 @@ define([
 
       _.bindAll(this, "render", "update");
       this.model.on("sync", this.render);
-      this.model.on("invalid", this.render);
+      this.model.on("invalid", function() { $("#rsvp-error-modal").modal(); });
       this.model.fetch();
     },
 
@@ -234,7 +248,14 @@ define([
 
     save: function(e) {
       e.preventDefault();
-      this.model.save();
+      this.model.save(null,{
+        success: function(model, user) {
+          $("#rsvp-success-modal").modal();
+        },
+        error: function() {
+          $("#edit-error-modal").modal();
+        }
+      });
     }
   });
 
@@ -272,13 +293,10 @@ define([
       e.stopPropagation();
       var id = $(e.currentTarget).parents("tr.guest").attr("id");
       var that = this;
-      $("#confirm-delete").modal();
-      $("#confirm-delete").find('.btn-ok')
+      $("#confirm-delete-modal").modal();
+      $("#confirm-delete-modal").find('.btn-ok')
         .one('click', function() {
-          $("#confirm-delete").one('hidden.bs.modal',function() { 
             that.collection.get(id).destroy();
-          });
-          $("#confirm-delete").modal('hide');
         });
     }
   });
@@ -321,6 +339,8 @@ define([
       this.model.login(function(model, user) {
         Users.me.fetch();
         Backbone.history.navigate("/", true);
+      },function() {
+        $("#login-error-modal").modal();
       });
     },
 
@@ -360,7 +380,7 @@ define([
     initialize: function() {
 
       _.bindAll(this, "render", "update");
-      this.model.on("invalid", function() { $("#rsvp-error").modal(); });
+      this.model.on("invalid", function() { $("#rsvp-error-modal").modal(); });
     },
 
     render: function() {
@@ -389,12 +409,12 @@ define([
       e.preventDefault();
       this.model.register(function(model, user) {
         Users.me.login(user);
-        $("#rsvp-success").modal();
-        $("#rsvp-success").on('hidden.bs.modal',function(){
+        $("#rsvp-success-modal").modal();
+        $("#rsvp-success-modal").on('hidden.bs.modal',function(){
           Backbone.history.navigate("/", true);
         });
       }, function() {
-        $("#rsvp-error").modal();
+        $("#rsvp-error-modal").modal();
       });
     }
   });

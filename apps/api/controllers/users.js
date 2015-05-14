@@ -228,7 +228,7 @@ module.exports = Controller.extend({
   			if (err)
   				res.status(400).json({error: err});
   			else
-  				res.status(200).end();
+  				res.json(user);
   		});
   	}
   }

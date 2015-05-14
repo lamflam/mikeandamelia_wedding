@@ -50,6 +50,13 @@
     .modal-dialog.modal-sm
       .modal-content
         .modal-body
-          | Check your email for alink to reset your password.
+          | Check your email for a link to reset your password.
+        .modal-footer.text-center
+          button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
+  .modal.fade#login-error-modal
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-body
+          | Unable to login, please make sure your email and password are correct.
         .modal-footer.text-center
           button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
