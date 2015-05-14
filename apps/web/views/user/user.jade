@@ -59,20 +59,3 @@
           .form-group.text-center
             .col-xs-3.center-btn#save-button
               button.btn.btn-dark {{button_text}}
-.modal.fade#rsvp-success
-  .modal-dialog.modal-sm
-    .modal-content
-      .modal-body
-        | Thanks! Your RSVP has been saved.
-      .modal-footer.text-center
-        button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
-.modal.fade#rsvp-error
-  .modal-dialog.modal-sm
-    .modal-content
-      .modal-body
-        | There was an error saving your RSVP.<br><br>
-        | If you've already RSVP'd, please <a href="/guests/login">Login</a>.<br><br>
-        | If not, make sure that you've entered your name and 
-        | that your password is at least 6 characters long.
-      .modal-footer.text-center
-        button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok

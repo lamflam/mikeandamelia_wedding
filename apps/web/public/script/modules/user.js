@@ -221,7 +221,7 @@ define([
 
       _.bindAll(this, "render", "update");
       this.model.on("sync", this.render);
-      this.model.on("invalid", function() { $("#rsvp-error-modal").modal(); });
+      this.model.on("invalid", function() { $("#edit-error-modal").modal(); });
       this.model.fetch();
     },
 

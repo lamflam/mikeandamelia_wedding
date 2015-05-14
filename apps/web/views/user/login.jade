@@ -32,31 +32,3 @@
           .form-group.text-center
             .col-xs-3.center-btn
               button.btn.btn-dark(id="{{#if reset}}reset-password{{else}}login{{/if}}-button") {{#if reset}} Reset {{else}} Login {{/if}}
-  .modal.fade#reset-email-error-modal
-    .modal-dialog.modal-sm
-      .modal-content
-        .modal-body
-          | Please enter a valid email address to receive a password reset link.
-        .modal-footer.text-center
-          button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
-  .modal.fade#reset-error-modal
-    .modal-dialog.modal-sm
-      .modal-content
-        .modal-body
-          | There was an error resetting your password.
-        .modal-footer.text-center
-          button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
-  .modal.fade#reset-success-modal
-    .modal-dialog.modal-sm
-      .modal-content
-        .modal-body
-          | Check your email for a link to reset your password.
-        .modal-footer.text-center
-          button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
-  .modal.fade#login-error-modal
-    .modal-dialog.modal-sm
-      .modal-content
-        .modal-body
-          | Unable to login, please make sure your email and password are correct.
-        .modal-footer.text-center
-          button.btn.btn-dark(type='button',data-dismiss='modal',aria-hidden='true') Ok
