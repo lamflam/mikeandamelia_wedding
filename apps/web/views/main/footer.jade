@@ -1,33 +1,34 @@
 footer#footer.navbar.navbar-default.navbar-centered
-  ul.nav.navbar-nav
-    {{#if admin}}
-    li
-      a(href='/guests') GUEST LIST
-    {{/if}}
-    {{#if user}}
-    {{#unless admin}}
-    li
-      a(href='/guests/me') RSVP
-    {{/unless}}
-    {{else}}
-    li
-      a(href='/guests/register') RSVP
-    {{/if}}
-    li
-      a(href='/lodging') LODGING
-    li
-      a(href='/what_to_expect') WHAT TO EXPECT
-    li
-      a(href='/photography') PHOTOGRAPHY HELP
-    li
-      a(href='/contact') CONTACT
-    {{#if user}}
-    li
-      a(href='/guests/logout') LOGOUT
-    {{else}}
-    li
-      a(href='/guests/login') LOGIN
-    {{/if}}
-  .navbar-brand.col-xs-12.text-center
-    a(href='/')
-      img.logo(src='/img/logo-white.png')
+  .container
+    ul.nav.navbar-nav
+      {{#if admin}}
+      li
+        a(href='/guests') GUEST LIST
+      {{/if}}
+      {{#if user}}
+      {{#unless admin}}
+      li
+        a(href='/guests/me') RSVP
+      {{/unless}}
+      {{else}}
+      li
+        a(href='/guests/register') RSVP
+      {{/if}}
+      li
+        a(href='/lodging') LODGING
+      li
+        a(href='/what_to_expect') WHAT TO EXPECT
+      li
+        a(href='/photography') PHOTOGRAPHY HELP
+      li
+        a(href='/contact') CONTACT
+      {{#if user}}
+      li
+        a(href='/guests/logout') LOGOUT
+      {{else}}
+      li
+        a(href='/guests/login') LOGIN
+      {{/if}}
+    .navbar-brand.col-xs-12.text-center
+      a(href='/')
+        img.logo(src='/img/logo-white.png')
