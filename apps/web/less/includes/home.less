@@ -25,12 +25,34 @@
 }
 
 .image {
-  border-radius: 5px;
-  overflow: hidden;
+  width: 100%;
+  position: relative;
+  margin: 15px 0px;
 }
 
-.image img {
-  width: 100%;
+.image.tall {
+  height: 505px;
+}
+
+.image.short {
+  height: 350px;
+}
+
+.image.huge {
+  height: 740px;
+}
+
+.image.pull-up {
+  margin-top: -140px;
+}
+
+.img-holder {
+  position: relative;
+  height: 100%;
+  border-radius: 5px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .img-banner {
@@ -46,44 +68,84 @@
   opacity: 0.8;
 }
 
-#lodging-banner {
-  top: -84px;
-}
-
 #pallet-banner {
   top: -450px;
+}
+
+#pallet-img {
+  background-image: url('/img/pallet.jpg');
+}
+
+#lodging-banner {
+  top: -180px;
+}
+
+#lodging-img {
+  background-image: url('/img/lodging.jpg');
+}
+
+#buffet-banner {
+  top: -180px;
+}
+
+#buffet-img {
+  background-image: url('/img/buffet1.jpg');
 }
 
 #honeymoon-banner {
   top: -300px;
 }
 
-#winebucket-banner {
-  top: -200px;
-}
-
-#buffet-banner {
-  top: -450px;
+#honeymoon-img {
+  background-image: url('/img/honeymoon.jpg');
 }
 
 #foodtruck-banner {
   top: -200px;
 }
 
-#photography-banner {
-  top: -242px;
+#foodtruck-img {
+  background-image: url('/img/foodtruck.jpg');
 }
 
-#contact-banner {
-  top:-84px;
+#winebucket-banner {
+  top: -200px;
+}
+
+#winebucket-img {
+  background-image: url('/img/winebucket.jpg');
 }
 
 #dog-banner {
   top:-450px;
 }
 
+#dog-img {
+  background-image: url('/img/dog.jpg');
+}
+
+#contact-banner {
+  top:-180px;
+}
+
+#contact-img {
+  background-image: url('/img/contact3.jpg');
+}
+
+#photography-banner {
+  top: -300px;
+}
+
+#photography-img {
+  background-image: url('/img/photography2.jpg');
+}
+
 #beach-banner {
   top:-200px;
+}
+
+#beach-img {
+  background-image: url('/img/beach.jpg');
 }
 
 #lodging {
