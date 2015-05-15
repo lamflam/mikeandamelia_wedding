@@ -66,6 +66,7 @@ module.exports = Controller.extend({
 	create: function(req, res, next) {
 
 		var user = req.body;
+    var $this = this;
 
 		User.create(user, function(err, user) {
 			if (err) {
@@ -74,12 +75,14 @@ module.exports = Controller.extend({
 			else {
 				res.cookie('tkn', User.getToken(user), { httpOnly: false });
 				res.json(user);
+        $this.sendConfirmationEmail(user);
 			}
 		});
 	},
 
 	update: hasPermission("edit_users", function(req, res, next) {
 		var user;
+    var $this = this;
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
 		else
@@ -89,6 +92,7 @@ module.exports = Controller.extend({
 					res.status(400).json({error: err});
 				else
 					res.json(user);
+          $this.sendConfirmationEmail(user);
 			});
   }),
 
@@ -185,7 +189,7 @@ module.exports = Controller.extend({
 			nodemailer.createTransport(_.clone(smtp));
 
 		this._mailer.sendMail({
-			from: smtp.auth.user,
+			from: (smtp.name ? smtp.name : '') + ' <' + smtp.auth.user + '>',
 			to: email,
 			subject: 'Password reset request',
 			text: 'To reset your password, please click on the link below.\n ' + 
@@ -199,6 +203,33 @@ module.exports = Controller.extend({
 				callback(null,info.messageId);
 		});
 	},
+
+  sendConfirmationEmail: function(user) {
+    
+    var smtp = this.config("smtp");
+
+    this._mailer = this._mailer || 
+      nodemailer.createTransport(_.clone(smtp));
+
+    this._mailer.sendMail({
+      from: (smtp.name ? smtp.name : '') + ' <' + smtp.auth.user + '>',
+      to: user.email,
+      subject: 'Wedding Confirmation',
+      text: 'Thank you for responding!\n\n' + 
+            'RSVP Confirmation\n' +
+            'Name: ' + user.name + '\n' +
+            'RSVP: ' + (user.rsvp || '') + '\n' +
+            'Guests: ' + (user.guests || 0) + '\n' + 
+            'Comment: ' + (user.comment || '') + '\n',
+      html: '<p>Thank you for responding!<br><br>' +
+            '<hr>' +  
+            '<h2>RSVP Confirmation</h2><br>' +
+            '<b>Name</b>: ' + user.name + '<br>' +
+            '<b>RSVP</b>: ' + (user.rsvp || '')+ '<br>' +
+            '<b>Guests</b>: ' + (user.guests || 0)+ '<br>' + 
+            '<b>Comment</b>: ' + (user.comment || '') + '<br></p>'
+    });
+  },
 
   me: function(req, res, next) {
 
@@ -220,6 +251,7 @@ module.exports = Controller.extend({
 
   updateMe: function(req, res, next) {
   	var user;
+    var $this = this;
   	if (!req.user)
   		res.status(401).json({error: "Not logged in"});
   	else {
@@ -227,8 +259,10 @@ module.exports = Controller.extend({
   		User.updateOne(user, function(err, user) {
   			if (err)
   				res.status(400).json({error: err});
-  			else
+  			else {
   				res.json(user);
+          $this.sendConfirmationEmail(user);
+        }
   		});
   	}
   }
