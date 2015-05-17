@@ -1,14 +1,136 @@
 
+
+@text-color: lighten(#d3d2cd,10);
 @background-color: #fff;
-@footer-height: 60px;
+@footer-height: 160px;
+
+@import url(http://fonts.googleapis.com/css?family=Cabin:400,700);
+@import url(http://fonts.googleapis.com/css?family=Lily+Script+One);
+
 
 html, body {
   height: 100%;
 }
 
+body {
+	font-family: 'Cabin', sans-serif;
+	color: @text-color;
+  background-color: #908c81;
+}
+
+#back-image {
+  position: relative;
+}
+
+#back-image:after {
+  content : "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-image: url("/img/banner.jpg"); 
+  background-repeat: no-repeat;
+  background-size: 100%;
+  width: 100%;
+  height: 100%;
+  opacity : 0.700;
+  z-index: -1;
+}
+
+.main-container {
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  background-color: #908c81;
+}
+
+.row {
+  margin: 0;
+}
+
+.well {
+  background-color: rgba(245,245,245,0.7);
+}
+
+.text-larger {
+  font-size: 1.3em;
+}
+
+.text-blue {
+  color: #3b4259;
+}
+
+.modal-body {
+  color: #3b4259;
+}
+
+.vertical-align {
+	position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.navbar-default {
+	background-color: transparent;
+	border: none;
+}
+
+.navbar a {
+	color: @text-color !important;
+	font-size: 12px;
+	/*font-weight: bold;*/
+  letter-spacing: 0.1em;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+    .navbar-centered .navbar-nav {
+        float: none;
+        text-align: center;
+    }
+    .navbar-centered .navbar-nav > li {
+        float: none;
+    }
+    .navbar-centered .nav > li {
+        display: inline;
+    }
+    .navbar-centered .nav > li > a {
+        display: inline-block;
+    }
+}
+
 #content {
-  min-height: calc(~"100% -" (@footer-height * 2 + 22) );
+  min-height: calc(~"100% -" (@footer-height * 2 + 10) );
   margin-bottom: @footer-height;
+}
+
+.logo {
+	width: 180px;
+}
+
+.btn {
+  color: #3b4259;
+  background-color: rgb(235, 235, 235);
+}
+
+
+.btn:hover {
+  background-color: darken(rgb(235, 235, 235),5%);
+}
+
+
+.btn.btn-dark {
+	background-color: #3b4259;
+	border-color: #3b4259;
+	color: #fff;
+}
+
+.btn.btn-dark:hover {
+	background-color: lighten(#3b4259,8%);
+	color: #fff;
 }
 
 #footer {
@@ -16,7 +138,13 @@ html, body {
   height: @footer-height;
   padding-top: 5px;
   margin-top: -@footer-height;
-  background-color: darken(@background-color, 10%);
+}
+
+hr {
+  width: 50%;
 }
 
 @import "includes/user";
+@import "includes/home";
+@import "includes/contact";
+

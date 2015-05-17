@@ -6,30 +6,29 @@ div#header(class='navbar navbar-default navbar-static-top')
         span.icon-bar
         span.icon-bar
         span.icon-bar
-      a.navbar-brand(href='/') Mike and Amelia
+      .navbar-brand
+        a(href='/')
+          img.logo(src='/img/logo-white.png')
     .navbar-collapse.collapse
-      ul.nav.navbar-nav
-        li
-          a(href='/') Home
-        li
-          a(href='/lodging') Lodging
+      ul.nav.navbar-nav.navbar-right
         {{#if admin}}
         li
-          a(href='/guests') Guest List
+          a(href='/guests') GUEST LIST
         {{/if}}
-      ul.nav.navbar-nav.navbar-right
         {{#if user}}
-        li.dropdown
-          a.dropdown-toggle(href='#', data-toggle='dropdown') {{user.name}}&nbsp;
-            b.caret
-          ul.dropdown-menu
-            li
-              a(href='/guests/me') Edit RSVP
-            li
-              a(href='/guests/logout') Logout
+        {{#unless admin}}
+        li
+          a(href='/guests/me') RSVP
+        {{/unless}}
         {{else}}
         li
-          a(href='/guests/login') Login
-        li
-          a(href='/guests/register') Register
+          a(href='/guests/register') RSVP
         {{/if}}
+        li
+          a(href='/lodging') LODGING
+        li
+          a(href='/what_to_expect') WHAT TO EXPECT
+        li
+          a(href='/photography') PHOTOGRAPHY HELP
+        li
+          a(href='/contact') CONTACT

@@ -7,6 +7,7 @@ var Role = new RoleModel();
 var passport = require('passport');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
+var nodemailer = require('nodemailer');
 var _ = require('underscore');
 
 var credentialFields = {
@@ -26,7 +27,7 @@ var verifyToken = function(token, done) {
 	});
 };
 
-var has_permission = function(permission, callback) {
+var hasPermission = function(permission, callback) {
 	return function(req, res, next) {
 		if (!req.user) {
 			res.status(401).json({error: "Unauthorized"});
@@ -36,7 +37,7 @@ var has_permission = function(permission, callback) {
 				if (err)
 					res.status(400).json({error: err});
 				else
-					Role.has_permission(permission, user.roles || [], function(err, authorized) {
+					Role.hasPermission(permission, user.roles || [], function(err, authorized) {
 						if (err)
 							res.status(400).json({error: err});
 						else if (!authorized)
@@ -64,11 +65,8 @@ module.exports = Controller.extend({
 
 	create: function(req, res, next) {
 
-		var user = {
-			email: req.body.email,
-			name: req.body.name,
-			hash: req.body.hash
-		};
+		var user = req.body;
+    var $this = this;
 
 		User.create(user, function(err, user) {
 			if (err) {
@@ -77,12 +75,14 @@ module.exports = Controller.extend({
 			else {
 				res.cookie('tkn', User.getToken(user), { httpOnly: false });
 				res.json(user);
+        $this.sendConfirmationEmail(user);
 			}
 		});
 	},
 
-	update: has_permission("edit_users", function(req, res, next) {
+	update: hasPermission("edit_users", function(req, res, next) {
 		var user;
+    var $this = this;
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
 		else
@@ -92,10 +92,11 @@ module.exports = Controller.extend({
 					res.status(400).json({error: err});
 				else
 					res.json(user);
+          $this.sendConfirmationEmail(user);
 			});
   }),
 
-	list: has_permission("view_users", function(req, res, next) {
+	list: hasPermission("view_users", function(req, res, next) {
 		User.list({ roles: "user" }, function(err, users) {
   		if (err)
   			res.status(400).json({error: err});
@@ -104,7 +105,7 @@ module.exports = Controller.extend({
   	});
 	}),
 
-	get: has_permission("view_users", function(req, res, next) {
+	get: hasPermission("view_users", function(req, res, next) {
 		if (!req.params.id)
 			res.status(400).json({error: "Invalid request"});
 		else
@@ -116,13 +117,25 @@ module.exports = Controller.extend({
 			});
 	}),
 
+	delete: hasPermission("delete_users", function(req, res, next) {
+		if (!req.params.id)
+			res.status(400).json({error: "Invalid request"});
+		else
+			User.delete({_id: User.objectID(req.params.id)}, function(err, deleted) {
+				if (err)
+					res.status(400).json({error: err});
+				else 
+					res.status(200).end();
+			});
+	}),
+
   authenticate: function(req, res, next) {
 		
 		passport.authenticate('local', function(err, user, info) {
 			if(err) return res.status(500).json({ error: err.toString() });
 			if(!user) return res.status(400).json({ error: "Invalid credentials" });
 			res.cookie('tkn', User.getToken(user), { httpOnly: false });
-			res.json({});
+			res.status(200).end();
 		})(req, res, next);
   },
 
@@ -132,6 +145,90 @@ module.exports = Controller.extend({
 			req.user = user;
 			next();
 		})(req, res, next);
+  },
+
+  resetToken: function(req, res, next) {
+  	var $this = this;
+  	var email = req.params.email;
+		if (!email)
+			res.status(400).json({error: "Invalid parameters"});
+		else
+			User.resetToken(email, function(err, token) {
+				if (err)
+					res.status(400).json({error: err});
+				else
+					$this.sendResetEmail(email, token, function(err) {
+						if (err)
+							res.status(400).json({error: "Unable to send email"});
+						else
+							res.status(200).end();
+					});
+			});
+  },
+
+  resetPassword: function(req, res, next) {
+  	var email = req.params.email;
+  	var hash = req.body.hash;
+  	var token = req.body.token;
+  	if (!token || !hash)
+  		res.status(400).json({error: "Invalid parameters"});
+  	else
+  		User.resetPassword(email, token, hash, function(err,user) {
+  			if(err)
+  				res.status(400).json({error: err});
+  			else
+  				res.status(200).end();
+  		});
+  },
+
+  sendResetEmail: function(email, token, callback) {
+		
+		var smtp = this.config("smtp");
+
+		this._mailer = this._mailer || 
+			nodemailer.createTransport(_.clone(smtp));
+
+		this._mailer.sendMail({
+			from: (smtp.name ? smtp.name : '') + ' <' + smtp.auth.user + '>',
+			to: email,
+			subject: 'Password reset request',
+			text: 'To reset your password, please click on the link below.\n ' + 
+						'localhost:3001/users/' + encodeURIComponent(email) + '/reset_password?token=' + token,
+			html: '<p>Hello,<br>Please click <a href="http://' + this.config("domain") + '/users/' + 
+						encodeURIComponent(email) + '/reset_password?token=' + token + '">here</a> to reset your password.</p>',
+		}, function(err, info) {
+			if (err)
+				callback(err);
+			else
+				callback(null,info.messageId);
+		});
+	},
+
+  sendConfirmationEmail: function(user) {
+    
+    var smtp = this.config("smtp");
+
+    this._mailer = this._mailer || 
+      nodemailer.createTransport(_.clone(smtp));
+
+    this._mailer.sendMail({
+      from: (smtp.name ? smtp.name : '') + ' <' + smtp.auth.user + '>',
+      to: user.email,
+      subject: 'Wedding Confirmation',
+      text: 'Thank you for responding!\n\n' + 
+            'RSVP Confirmation\n' +
+            'Name: ' + user.name + '\n' +
+            'RSVP: ' + (user.rsvp || '') + '\n' +
+            'Guests: ' + (user.guests || 0) + '\n' + 
+            'Comment: ' + (user.comment || '') + '\n',
+      html: '<p>Thank you for responding!<br><br>' +
+            '<hr>' +  
+            '<h2>RSVP Confirmation</h2><br>' +
+            '<b>Name</b>: ' + user.name + '<br>' +
+            '<b>RSVP</b>: ' + (user.rsvp || '')+ '<br>' +
+            '<b>Guests</b>: ' + (user.guests || 0)+ '<br>' + 
+            '<b>Comment</b>: ' + (user.comment || '') + '<br></p>'
+    });
   },
 
   me: function(req, res, next) {
@@ -154,6 +251,7 @@ module.exports = Controller.extend({
 
   updateMe: function(req, res, next) {
   	var user;
+    var $this = this;
   	if (!req.user)
   		res.status(401).json({error: "Not logged in"});
   	else {
@@ -161,9 +259,13 @@ module.exports = Controller.extend({
   		User.updateOne(user, function(err, user) {
   			if (err)
   				res.status(400).json({error: err});
-  			else
+  			else {
   				res.json(user);
+          $this.sendConfirmationEmail(user);
+        }
   		});
   	}
   }
+}, {
+	hasPermission: hasPermission
 });

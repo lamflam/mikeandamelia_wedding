@@ -15,7 +15,7 @@ var App = module.exports = App.extend({
 
 		for (key in keys) {
 			SubApp = require(path.join(__dirname,'apps',key,'app.js'));
-			subapp = new SubApp(path.join(__dirname,'apps',key,'config.json'));
+			subapp = new SubApp(this.config);
 			this.app.use(subapp.app);
 		}
 	}

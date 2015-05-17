@@ -5,9 +5,13 @@ define([
   "jquery",
   "handlebars",
   "user",
+  //"convo",
   "text!tmpl/main/body.html",
   "text!tmpl/main/home.html",
-  "text!tmpl/main/lodging.html"
+  "text!tmpl/main/lodging.html",
+  "text!tmpl/main/photo.html",
+  "text!tmpl/main/what_to_expect.html",
+  "text!tmpl/main/contact.html"
 
 ], function( 
 
@@ -15,9 +19,13 @@ define([
   $,
   Handlebars,
   Users,
+  //Convos,
   body_template,
   home_template,
-  lodging_template
+  lodging_template,
+  photo_template,
+  what_to_expect_template,
+  contact_template
 
 ) {
 
@@ -37,17 +45,20 @@ define([
   // the header and footer
   var Main = function() {
 
+    this.selector = "#content";
+
     // Unlike other modules, the main modules always loads
     // a view and the sub modules will attach their views
     // to it.
     var view = new MainView();
     view.setElement($("body")).render();
 
-    // This router is basically just for 404s
-    var router = new this.Router( "#content" );
+    // Load our routes
+    new this.Router( this.selector );
 
     // Load submodules
-    var users = new Users( "#content" );
+    new Users( this.selector );
+    //new Convos( this.selector );
 
     Users.me.on("change", function(me) {
 
@@ -58,11 +69,26 @@ define([
       admin = user && user.roles.indexOf("admin") !== -1;
 
       view.render("#header", { user: user, admin: admin } );
+      view.render("#footer", { user: user, admin: admin } );
     });
 
-    Backbone.history.start( { pushState: true } );
-
     return this;
+  };
+
+  Main.prototype.start = function() {
+
+    Backbone.history.start( { pushState: true } );
+  },
+
+  Main.prototype.setView = function(view) {
+
+      if (this.view) {
+        this.view.remove();
+        delete this.view;
+      }
+
+      this.view = view;
+      $(this.selector).append(this.view.render().el);
   };
 
   var MainView = Main.prototype.MainView = Backbone.View.extend({
@@ -77,7 +103,7 @@ define([
     render: function( partial, data ) {
 
       if (partial) {
-        $(partial).html( $(this.template( data )).filter(partial).html() );
+        $(partial).html( $(this.template( data )).find(partial).html() );
       }
       else {
         this.$el.html( this.template( data ) );
@@ -120,6 +146,69 @@ define([
     }
   });
 
+  var PhotoView = Main.prototype.PhotoView = Backbone.View.extend({
+
+    template: Handlebars.compile( photo_template ),
+
+    initialize: function(selector) {
+      
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+
+      this.$el.html( this.template() );
+
+      return this;
+    }
+  });
+
+  var WhatToExpectView = Main.prototype.PhotoView = Backbone.View.extend({
+
+    template: Handlebars.compile( what_to_expect_template ),
+
+    initialize: function(selector) {
+      
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+
+      this.$el.html( this.template() );
+
+      return this;
+    }
+  });
+
+  var ContactView = Main.prototype.PhotoView = Backbone.View.extend({
+
+    template: Handlebars.compile( contact_template ),
+
+    initialize: function(selector) {
+      
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+
+      this.$el.html( this.template() );
+
+      return this;
+    }
+  });  
+
+  var ErrorView = Main.prototype.LodgingView = Backbone.View.extend({
+
+    initialize: function(selector) {
+      _.bindAll(this, "render");
+    },
+
+    render: function() {
+      this.$el.html( "404" );
+      return this;
+    }
+  });
+
   // A generic router that just redirects to the current main
   // page. Right now it's the chooser, eventually it'll
   // the blog page.
@@ -134,26 +223,42 @@ define([
       '': 'home',
       'home': 'home',
       'lodging': 'lodging',
+      'photography': 'photography',
+      'what_to_expect': 'whatToExpect',
+      'contact': 'contact',
       '*404': 'error'
     },
 
     error: function() { 
       
       if (Backbone.history.fragment)
-        Backbone.$(this.selector).html("404");
+        app.setView(new ErrorView());
     },
 
     home: function() {
 
-      var view = new HomeView();
-      view.setElement($(this.selector)).render();
+      app.setView(new HomeView());
     },
 
     lodging: function() {
 
-      var view = new LodgingView();
-      view.setElement($(this.selector)).render();
-    }
+      app.setView(new LodgingView());
+    },
+
+    photography: function() {
+
+      app.setView(new PhotoView());
+    },
+
+    whatToExpect: function() {
+
+      app.setView(new WhatToExpectView());
+    },
+
+    contact: function() {
+
+      app.setView(new ContactView());
+    }    
 
   });
 

@@ -1,19 +1,34 @@
-h2.text-center Login
-hr.col-xs-offset-3.col-xs-6
-.login
-  .col-xs-6.col-xs-offset-3
-    .well
-      form.form-horizontal(action='#', method='post')
-        .form-group
-          .col-xs-2
-            label.control-label(for="email") Email
-          .col-xs-10
-            input#email.form-control(name='email', placeholder='littlebobbytables@example.com')
-        .form-group
-          .col-xs-2
-            label.control-label(for="password") Password
-          .col-xs-10
-            input#password.form-control(name='password', type='password', placeholder='password')
-        .form-group.text-center
-          .col-xs-3.center-btn
-            button.btn.btn-primary.login Login
+#main.row
+  h2.text-center {{#if reset}} Reset Password {{else}} Login {{/if}}
+  hr
+  .login
+    .col-xs-12.col-sm-6.col-sm-offset-3
+      .well.text-blue
+        {{#unless reset}}
+        #already.text-center.col-xs-12
+          .col-xs-offset-3.col-xs-6.text-center
+            | Forgot your password? <a id='reset-token-button' href='#'>Reset</a> it.
+        {{/unless}}
+        form.form-horizontal(action='#', method='post')
+          .form-group
+            .col-xs-2
+              label.control-label(for="email") Email
+            .col-xs-10
+              {{#if reset}}
+              input#email.form-control(name='email', disabled, value="{{user.email}}")
+              {{else}}
+              input#email.form-control(name='email', placeholder='youremail@example.com', value="{{user.email}}")
+              {{/if}}
+          .form-group
+            .col-xs-2
+              label.control-label(for="password") Password
+            .col-xs-10
+              input#password.form-control(name='password', type='password', placeholder='Password', value="{{user.password2}}")
+          .form-group(class='{{#if error.password2}}has-error{{/if}} {{#unless reset}}hidden{{/unless}}')
+            .col-xs-2
+              label.control-label(for="password2") Confirm
+            .col-xs-10
+              input#password2.form-control(name='password2', placeholder='Confirm Password', type='password', value="{{user.password2}}")
+          .form-group.text-center
+            .col-xs-3.center-btn
+              button.btn.btn-dark(id="{{#if reset}}reset-password{{else}}login{{/if}}-button") {{#if reset}} Reset {{else}} Login {{/if}}

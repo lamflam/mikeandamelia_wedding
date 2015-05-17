@@ -33,6 +33,7 @@ requirejs.config({
 });
 
 require([ "main" ], function( Main ) {
-
-  window.app = new Main();
+  
+  app = new Main();
+  app.start();
 });

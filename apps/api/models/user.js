@@ -4,15 +4,32 @@ var MongoModel = require( '../../../lib/model' ).MongoModel;
 var jwt = require('jwt-simple');
 var _ = require('underscore');
 
-var privateFields = {
-	hash: 0,
-  salt: 0,
-	iter: 0
+var userFields = {
+	_id: true,
+	name: true,
+	email: true,
+	roles: true,
+	rsvp: true,
+	guests: true,
+	comment: true,
+	hash: false,
+	iter: false,
+	salt: false,
+	reset_token: false
 };
 
-var removePrivateFields = function(user, keep) {
-	var remove = _.omit(privateFields, keep || []);
-	return user ? _.omit(user, _.keys(remove)) : null;
+var publicFields = _.filter(_.keys(userFields),function(key) { 
+	return userFields[key]; 
+});
+
+var privateFields = _.keys(_.omit(userFields, publicFields));
+
+var removePrivateFields = function(user) {
+	return user ? _.omit(user, privateFields) : null;
+};
+
+var stripExtraFields = function(user) {
+	return _.pick(user, _.keys(userFields));
 };
 
 var generateHash = function( user, callback ) {
@@ -36,16 +53,20 @@ module.exports = MongoModel.extend({
   },
 
   list: function(query, callback) {
-  	return this.find(query, privateFields, callback);
+  	var project = {};
+  	_.each(publicFields, function(field) { project[field] = 1; });
+  	return this.find(query, {fields: project}, callback);
   },
 
   get: function(query, callback) {
-  	console.log()
-  	return this.findOne(query, privateFields, callback);
+  	var project = {};
+  	_.each(publicFields, function(field) { project[field] = 1; });
+  	return this.findOne(query, {fields: project}, callback);
   },
 
   create: function( user, callback ) {
 
+  	var user = stripExtraFields(user);
   	var $this = this;
   	
   	if (!user.roles) {
@@ -67,7 +88,7 @@ module.exports = MongoModel.extend({
   updateOne: function(user, callback) {
 
   	// email cannot be changed
-  	var user = _.clone(user);
+  	var user = stripExtraFields(user);
   	var email = user.email;
   	delete user.email;
   	delete user._id;
@@ -81,6 +102,15 @@ module.exports = MongoModel.extend({
   	else {
   		callback("Invalid data");
   	}
+  },
+
+  delete: function(user, callback) {
+
+  	if (!user._id) {
+  		callback("Must provide id to delete user.");
+  	}
+  	else
+  		this.remove(user, callback);
   },
 
   validate: function( user, isNew ) {
@@ -134,6 +164,64 @@ module.exports = MongoModel.extend({
 
 		if (callback) callback(null, token);
 		return token;
+	},
+
+	resetToken: function(email, callback) {
+		
+		if (!email) {
+			callback({error: "No user provided"});
+			return;
+		}
+
+		var date = new Date();
+		// Set to expire after a day
+		date.setTime(date.getTime() + (24 * 3600 * 1000));
+		var token = jwt.encode({
+			rand: crypto.randomBytes(16).toString('Base64'),
+			expires: date
+		}, "password_secret");
+
+ 		this.findAndModify(
+ 			{email: email}, 
+ 			[['_id',1]], 
+ 			{$set: {password_reset_token: token}}, 
+ 			{new: true}, 
+ 			function(err, user) {
+				if (err)
+					callback(err);
+				else
+					callback(null, token);
+  		}
+  	);
+	},
+
+	resetPassword: function(email, token, newPassword, callback) {
+
+		var $this = this;
+		var info = jwt.decode(token, "password_secret");
+		
+		var now = Date.now();
+		var expires = new Date(info.expires);
+		if (now > expires)
+			callback("expired");
+		else
+			generateHash({hash: newPassword}, function(err, user) {
+				if (err)
+					callback(err);
+				else
+					$this.findAndModify(
+						{email: email, password_reset_token: token},  
+						[['_id',1]],
+				    {$set: user, $unset: {password_reset_token: ''}},
+				    {new: true},
+				    function(err, user) {
+							if (err)
+								callback(err);
+							else
+								callback(null, removePrivateFields(user));
+			  		}
+			  	);
+			});
 	}
 
 });

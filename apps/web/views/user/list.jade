@@ -1,0 +1,24 @@
+#main.row
+  h2.text-center Guest List
+  hr
+  #guestlist.col-xs-12.col-sm-8.col-sm-offset-2
+    .well.text-blue.row
+      table.table-striped.table-hover.col-xs-12
+        thead
+          tr
+            th.name-column Name
+            th.email-column Email
+            th.guests-column Guests
+            th.rsvp-column RSVP
+            th 
+        tbody
+          {{#each guests}}
+          tr.guest(id="{{this._id}}")
+            td {{this.name}}
+            td {{this.email}}
+            td {{this.guests}}
+            td {{this.rsvp}}
+            td.text-center
+              .button.delete
+                span.glyphicon.glyphicon-remove
+          {{/each}}
