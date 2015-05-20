@@ -92,7 +92,7 @@ module.exports = Controller.extend({
 					res.status(400).json({error: err});
 				else
 					res.json(user);
-          $this.sendConfirmationEmail(user);
+          //$this.sendConfirmationEmail(user);
 			});
   }),
 
