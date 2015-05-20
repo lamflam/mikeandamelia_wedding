@@ -38,9 +38,11 @@
                 <option {{#unless responded}}selected{{/unless}} disabled> Select One </option>
           .form-group
             .col-xs-2
-              label.control-label(for="guests") Guests
+              label.control-label.multi-line(for="guests") Total Guests
             .col-xs-3
-              input#guest.form-control(name='guests', type='number', value='{{user.guests}}') 
+              input#guest.form-control(name='guests', type='number', value='{{user.guests}}')
+            .col-xs-4
+              label.control-label (Including yourself)
           .form-group
             .col-xs-2
               label.control-label(for="comment") Comment
